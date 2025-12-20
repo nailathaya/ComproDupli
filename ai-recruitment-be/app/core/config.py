@@ -5,5 +5,5 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "mysql+pymysql://root:password@localhost/db_compro"
+    "mysql+pymysql://root:password@localhost/candidates"
 )

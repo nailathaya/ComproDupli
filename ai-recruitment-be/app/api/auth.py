@@ -24,6 +24,7 @@ def register_user(payload: RegisterRequest, db: Session = Depends(get_db)):
         password=hashed_password,
         role="candidate",
         location="",
+        avatar_url="https://i.pravatar.cc/150?u=ahmad.p@example.com",
         online_status="offline",
     )
 
@@ -31,4 +32,42 @@ def register_user(payload: RegisterRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    return user
+    return {
+            "id": str(user.id),
+            "name": user.full_name,
+            "email": user.email,
+            "location": user.location,
+            "role": user.role,
+            "onlineStatus": user.online_status,
+            "avatarUrl": user.avatar_url,
+            "password": user.password
+        }
+
+from app.schemas.request import LoginRequest
+
+@router.post("/login", response_model=UserResponse)
+def login_user(payload: LoginRequest, db: Session = Depends(get_db)):
+    # 1. Cari user berdasarkan email
+    user = db.query(User).filter(User.email == payload.email).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Email atau password salah")
+
+    # 2. Verifikasi password
+    if not pwd_context.verify(payload.password, user.password):
+        raise HTTPException(status_code=400, detail="Email atau password salah")
+
+    # 3. Update status online (opsional)
+    user.online_status = "online"
+    db.commit()
+    db.refresh(user)
+
+    # 4. Return response (SESUIAI response_model)
+    return {
+        "id": str(user.id),
+        "name": user.full_name,
+        "email": user.email,
+        "location": user.location,
+        "role": user.role,
+        "onlineStatus": user.online_status,
+        "avatarUrl": user.avatar_url,
+    }

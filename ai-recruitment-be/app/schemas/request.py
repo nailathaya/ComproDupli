@@ -5,7 +5,6 @@ from typing import Optional
 class CandidateDetailRequest(BaseModel):
     candidate_id: str
 
-
 class CandidateSearchRequest(BaseModel):
     position: Optional[str] = None
     skill: Optional[str] = None
@@ -22,3 +21,8 @@ class RegisterRequest(BaseModel):
     name: str
     email: EmailStr
     password: str
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+

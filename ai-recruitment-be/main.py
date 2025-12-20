@@ -24,6 +24,14 @@ app.add_middleware(
 
 app.include_router(candidates.router)
 
+
 @app.get("/")
 def root():
     return {"status": "running"}
+
+@app.post("/auth/register")
+def register(data: dict):
+    return {
+        "status": "success",
+        "data": data
+    }
