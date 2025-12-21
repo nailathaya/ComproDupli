@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import datetime, date
 
 
 class UserResponse(BaseModel):
@@ -86,3 +87,17 @@ class CandidateListResponse(BaseModel):
 
 class LLMQueryResponse(BaseModel):
     answer: str
+
+# class JobPostingResponse(BaseModel):
+#     id: int
+#     title: str
+#     department: str
+#     employment_type: str
+#     location: str
+#     status: str
+
+#     closing_date: Optional[date]
+#     created_at: datetime
+
+#     class Config:
+#         orm_mode = True

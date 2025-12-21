@@ -10,10 +10,12 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     full_name = Column(String(100), nullable=False)
     email = Column(String(150), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)  # ⬅️ KOLOM PASSWORD
+    password = Column(String(255), nullable=False)
 
     location = Column(String(100))
-    role = Column(Enum("candidate", "recruiter", "admin"))
+    phone_number = Column(String(20) )
+
+    role = Column(Enum("candidate", "hrd", "admin"))
     online_status = Column(Enum("online", "offline"))
     avatar_url = Column(String(255))
 
