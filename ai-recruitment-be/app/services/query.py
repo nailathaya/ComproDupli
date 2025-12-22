@@ -7,162 +7,134 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
 from dotenv import load_dotenv
-from data import CANDIDATE_DATA as DATA_PELAMAR
+from data import candidates_dummy as DATA_PELAMAR
 
 load_dotenv()
 
-CHROMA_PATH = os.getenv("CHROMA_PATH", "./chroma_db")
+CHROMA_PATH = "./chroma_db"
+MODEL_NAME = "intfloat/multilingual-e5-small"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def get_candidate_by_id(candidate_id: str) -> Dict:
-    """
-    Fungsi ini mensimulasikan query ke SQL/NoSQL Database
-    SELECT * FROM candidates WHERE id = 'candidate_id'
-    """
+    """Mencari data lengkap kandidat berdasarkan ID."""
     for person in DATA_PELAMAR:
-        if person['id'] == candidate_id:
+        if str(person.get('id')) == str(candidate_id):
             return person
     return None
 
-def to_toon_format(data: Dict) -> str:
-    """
-    Mengubah Dictionary menjadi string JSON yang sangat padat (Minified).
-    Menghapus spasi yang tidak perlu untuk menghemat Token OpenAI.
-    """
-    return json.dumps(data, separators=(',', ':'), ensure_ascii=False)
+def to_compact_json(data: Dict) -> str:
+    """Mengonversi dict ke JSON string untuk efisiensi token LLM."""
+    filtered_data = {k: v for k, v in data.items() if k not in ['avatarUrl', 'documents', 'activity']}
+    return json.dumps(filtered_data, separators=(',', ':'), ensure_ascii=False)
 
 def find_best_candidates_raw(position: str, description: str, top_k: int = 5):
     embedding_model = HuggingFaceEmbeddings(
-        model_name="intfloat/multilingual-e5-small",
+        model_name=MODEL_NAME,
         model_kwargs={"device": "cpu"},
         encode_kwargs={"normalize_embeddings": True}
     )
     
+    if not os.path.exists(CHROMA_PATH):
+        print(f"❌ Database tidak ditemukan di {CHROMA_PATH}. Jalankan embedding.py dulu!")
+        return []
+
     db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_model)
 
     print(f"🔍 [Phase 1] Semantic Search untuk: '{position}'")
     
+    optimized_query = f"query: {description}"
+    
     results = db.similarity_search_with_score(
-        query=description,
-        k=top_k,
-        filter={"position_applied": position}
+        query=optimized_query,
+        k=top_k
     )
 
     if not results:
+        print("⚠️ Tidak ditemukan kandidat yang cocok di database.")
         return []
 
     candidates_payload = []
-    
     print(f"   -> Ditemukan {len(results)} kandidat potensial. Mengambil data asli...")
 
     for doc, score in results:
-        c_id = doc.metadata.get('candidate_id')
+        c_id = doc.metadata.get('candidate_id') 
         original_data = get_candidate_by_id(c_id)
         
         if original_data:
-            original_data['vector_score'] = round(score, 4)
+            original_data['vector_distance_score'] = round(float(score), 4)
             candidates_payload.append(original_data)
 
     return candidates_payload
 
 def score_candidates_with_llm(job_description: str, candidates_data: List[Dict]):
     if not candidates_data:
-        print("❌ Tidak ada data kandidat untuk dinilai.")
+        print("❌ Tidak ada data kandidat untuk dinilai oleh LLM.")
         return
 
-    print(f"\n🤖 [Phase 2] Mengirim {len(candidates_data)} kandidat ke AI untuk Scoring...")
+    print(f"\n🤖 [Phase 2] Mengirim {len(candidates_data)} kandidat ke GPT-4o untuk Scoring...")
     
-    # Mengonversi data kandidat menjadi string JSON yang padat
     candidates_str = ""
     for cand in candidates_data:
-        compact_json = to_toon_format(cand) 
-        candidates_str += f"- {compact_json}\n"
+        candidates_str += f"- {to_compact_json(cand)}\n"
 
-    # Inisialisasi ChatOpenAI
-    # Menggunakan model 'gpt-4o' atau 'gpt-3.5-turbo' yang stabil
     chat = ChatOpenAI(
         model="gpt-4o", 
-        temperature=0.2, 
+        temperature=0,
         openai_api_key=OPENAI_API_KEY,
         model_kwargs={"response_format": {"type": "json_object"}}
     )
 
     system_prompt = """
-    Anda adalah Senior HR Specialist Expert. Tugas Anda:
-    1. Analisis JSON data kandidat yang diberikan.
-    2. Bandingkan skill, pengalaman, dan pendidikan dengan Deskripsi Pekerjaan.
-    3. Berikan Skor (0-100) seobjektif mungkin.
-    4. Berikan output dalam format JSON dengan key "results" yang berisi array of objects.
-    """
+    Anda adalah Senior HR Specialist. 
+    Tugas Anda adalah menilai kecocokan kandidat dengan Deskripsi Pekerjaan secara objektif.
+    
+    Kriteria Penilaian:
+    1. Kecocokan Skill yang Dibutuhkan.
+    2. Kesesuaian Pengalaman Kerja.
+    3. Ekspektasi Gaji vs Kualifikasi.
 
-    user_prompt = f"""
-    JOB DESCRIPTION:
-    {job_description}
-
-    CANDIDATES DATA:
-    {candidates_str}
-
-    RETURN JSON FORMAT:
-    {{
+    Output WAJIB format JSON:
+    {
         "results": [
-            {{
-                "nama": "Nama Kandidat",
-                "skor": 85,
-                "analisis_singkat": "Analisis relevansi skill...",
-                "rekomendasi": "Interview Segera/Pertimbangkan/Tolak"
-            }}
+            {
+                "id": "ID_KANDIDAT",
+                "nama": "Nama Lengkap",
+                "skor": 0-100,
+                "analisis_singkat": "Alasan skor tersebut diberikan",
+                "rekomendasi": "Interview / Cadangan / Tolak"
+            }
         ]
-    }}
+    }
     """
+
+    user_prompt = f"JOB DESCRIPTION:\n{job_description}\n\nDATA KANDIDAT:\n{candidates_str}"
 
     try:
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt)
-        ]
-
+        messages = [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
         response = chat.invoke(messages)
-        
-        # Karena kita menggunakan response_format json_object, 
-        # kita bisa langsung load content-nya
         data_output = json.loads(response.content)
-        final_scores = data_output.get("results", [])
         
         print("\n🏆 HASIL AKHIR PENILAIAN AI:")
-        print("=" * 60)
-        # Urutkan berdasarkan skor tertinggi
-        sorted_scores = sorted(final_scores, key=lambda x: x['skor'], reverse=True)
+        print("=" * 75)
+        sorted_results = sorted(data_output.get("results", []), key=lambda x: x['skor'], reverse=True)
         
-        for res in sorted_scores:
-            print(f"Nama       : {res.get('nama')}")
-            print(f"Skor       : {res.get('skor')} / 100")
-            print(f"Analisis   : {res.get('analisis_singkat')}")
-            print(f"Keputusan  : {res.get('rekomendasi')}")
-            print("-" * 60)
+        for res in sorted_results:
+            emoji = "✅" if res.get('skor') >= 80 else "⚠️" if res.get('skor') >= 60 else "❌"
+            print(f"{emoji} [{res.get('skor')}/100] {res.get('nama')} -> {res.get('rekomendasi')}")
+            print(f"   Analisis: {res.get('analisis_singkat')}")
+            print("-" * 75)
             
     except Exception as e:
-        print(f"❌ Terjadi kesalahan saat memproses scoring: {e}")
+        print(f"❌ Terjadi kesalahan saat scoring LLM: {e}")
 
 if __name__ == "__main__":
+    DESKRIPSI_KERJA = "Mencari Backend Engineer senior yang ahli Golang, Microservices, dan Redis. Lebih disukai yang berpengalaman di Fintech."
     
-    POSISI = "Frontend Developer"
-    REQ_HRD = "Dicari Frontend Developer yang jago ReactJS dan Next.js. Pengalaman minimal 3 tahun menangani high traffic. Paham TypeScript adalah nilai plus."
-
-    top_candidates_json = find_best_candidates_raw(
-        position=POSISI,
-        description=REQ_HRD,
+    top_candidates = find_best_candidates_raw(
+        position="Backend Developer",
+        description=DESKRIPSI_KERJA,
         top_k=3
     )
 
-    print("\n🎯 Kandidat Teratas (Raw Data):")
-    for idx, cand in enumerate(top_candidates_json, start=1):
-        print(f"{idx}. {cand['name']} - Score Vektor: {cand['vector_score']}")
-
-
-    candidates_str = ""
-    for cand in top_candidates_json:
-        compact_json = to_toon_format(cand) 
-        candidates_str += f"- {compact_json}\n"
-
-    if top_candidates_json:
-        score_candidates_with_llm(REQ_HRD, top_candidates_json)
+    if top_candidates:
+        score_candidates_with_llm(DESKRIPSI_KERJA, top_candidates)

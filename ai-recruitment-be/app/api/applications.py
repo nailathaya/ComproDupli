@@ -23,11 +23,10 @@ def apply_job(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # 🔐 hanya kandidat
+
     if current_user.role != "candidate":
         raise HTTPException(status_code=403, detail="Only candidate can apply job")
 
-    # ❌ prevent duplicate apply
     exists = db.query(Application).filter(
         Application.user_id == current_user.id,
         Application.job_id == payload.job_id
@@ -36,7 +35,6 @@ def apply_job(
     if exists:
         raise HTTPException(status_code=400, detail="Already applied to this job")
 
-    # 1️⃣ create application
     application = Application(
         user_id=current_user.id,
         job_id=payload.job_id,
@@ -46,7 +44,6 @@ def apply_job(
     db.commit()
     db.refresh(application)
 
-    # 2️⃣ create application stages ✅ FIX
     DEFAULT_STAGES = [
         "Screening",
         "Psikotest",
@@ -59,7 +56,7 @@ def apply_job(
         ApplicationStage(
             application_id=application.id,
             name=stage,
-            status="Pending"  # ✅ BUKAN stage_status
+            status="Pending" 
         )
         for stage in DEFAULT_STAGES
     ]
@@ -145,24 +142,6 @@ def get_my_applications(
 
     return result
 
-
-    # result = []
-    # for app in applications:
-    #     result.append({
-    #         "id": app.id,
-    #         "position": app.position,
-    #         "applied_at": app.applied_at,
-    #         "status": app.status,
-    #         "stages": [
-    #             {
-    #                 "name": stage.name,
-    #                 "status": stage.stage_status
-    #             }
-    #             for stage in app.stages
-    #         ]
-    #     })
-
-    # return result
 @router.put("/{application_id}/stage")
 def update_stage(
     application_id: int,

@@ -25,34 +25,6 @@ from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/candidates", tags=["Candidates"])
 
-# @router.get("/", response_model=List[CandidateListItemResponse])
-# def get_all_candidates(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(get_current_user),
-# ):
-#     # 🔐 Hanya HRD
-#     if current_user.role != "hrd":
-#         raise HTTPException(
-#             status_code=403,
-#             detail="Only HRD can access candidates"
-#         )
-
-#     candidates = (
-#         db.query(User)
-#         .filter(User.role == "candidate")
-#         .options(
-#             joinedload(User.experiences),
-#             joinedload(User.educations),
-#             joinedload(User.skills),
-#             joinedload(User.salary),
-#             joinedload(User.documents),
-#         )
-#         .all()
-#     )
-
-#     return candidates
-
-
 @router.get("/{candidate_id}")
 def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == candidate_id).first()
@@ -204,46 +176,49 @@ def save_documents(candidate_id: int, data: list[DocumentRequest], db: Session =
     db.commit()
     return {"message": "Documents saved"}
 
-@router.get(
-    "/",
-    response_model=List[CandidateListItemResponse]
-)
+@router.get("/")
 def get_all_candidates(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     if current_user.role != "hrd":
         raise HTTPException(status_code=403, detail="Forbidden")
 
     users = (
         db.query(User)
-        .join(Application, Application.user_id == User.id)
+        .options(
+            joinedload(User.applications)
+            .joinedload(Application.stages),
+            joinedload(User.applications)
+            .joinedload(Application.job),
+        )
         .filter(User.role == "candidate")
-        .distinct()
         .all()
     )
 
     result = []
 
     for user in users:
-        # ambil lamaran TERBARU (kalau ada)
-        application = (
-            sorted(
-                user.applications,
-                key=lambda a: a.applied_at,
-                reverse=True
-            )[0]
-            if user.applications
-            else None
-        )
+        applications = []
+        for app in user.applications:
+            applications.append({
+                "id": app.id,
+                "job_id": app.job_id,
+                "position": app.job.title if app.job else "",
+                "applied_date": app.applied_at,
+                "status": app.status,
+                "stages": [
+                    {
+                        "name": s.name,
+                        "status": s.status
+                    }
+                    for s in app.stages
+                ]
+            })
 
         result.append({
             "id": user.id,
-            "positionApplied": (
-                application.job.title
-                if application and application.job
-                else None
-            ),
+            "positionApplied": applications[0]["position"] if applications else None,
             "user": {
                 "id": user.id,
                 "name": user.full_name,
@@ -252,7 +227,8 @@ def get_all_candidates(
                 "role": user.role,
                 "onlineStatus": user.online_status,
                 "avatarUrl": user.avatar_url,
-            }
+            },
+            "applicationHistory": applications
         })
 
     return result

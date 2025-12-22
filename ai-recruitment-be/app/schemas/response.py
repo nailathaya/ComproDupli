@@ -3,18 +3,8 @@ from typing import List, Optional
 from datetime import datetime, date
 
 
-# class UserResponse(BaseModel):
-#     id: str
-#     name: str
-#     email: str
-#     location: str
-#     role: str
-#     onlineStatus: str
-#     avatarUrl: str
-
-
 class UserResponse(BaseModel):
-    id: int                     # ✅ FIX
+    id: int                     
     name: str
     email: str
     location: Optional[str]
@@ -89,11 +79,6 @@ class CandidateResponse(BaseModel):
     activity: List[ActivityResponse]
     applicationHistory: List[ApplicationHistoryResponse]
 
-
-# class CandidateListResponse(BaseModel):
-#     candidates: List[CandidateResponse]
-
-
 class LLMQueryResponse(BaseModel):
     answer: str
 
@@ -114,6 +99,7 @@ class JobPostingResponse(BaseModel):
 
 class CandidateListItemResponse(BaseModel):
     id: int
+    job_id: Optional[int]
     positionApplied: Optional[str]
     user: UserResponse
 
