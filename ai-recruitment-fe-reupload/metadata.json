@@ -1,0 +1,5 @@
+{
+  "name": "AI Recruitment System",
+  "description": "A frontend for an AI-powered recruitment system to help HR map job needs and match them with applicant profiles automatically. Features include profile management, a dynamic job board, and analytics.",
+  "requestFramePermissions": []
+}

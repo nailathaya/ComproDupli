@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Recruitment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary': '#2563eb', // blue-600
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      /* Mencegah gaya autofill default browser */
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus,
+      input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 30px white inset !important;
+          -webkit-text-fill-color: #000000 !important;
+          transition: background-color 5000s ease-in-out 0s;
+      }
+
+      /* Animasi untuk menyorot section */
+      @keyframes highlight-fade {
+        from { background-color: rgba(37, 99, 235, 0.15); }
+        to { background-color: transparent; }
+      }
+      .highlight-section {
+          animation: highlight-fade 3s ease-in-out forwards;
+      }
+      
+      @keyframes highlight-fade-red {
+        from { background-color: rgba(239, 68, 68, 0.15); } /* red-500 with opacity */
+        to { background-color: transparent; }
+      }
+      .highlight-section-red {
+          animation: highlight-fade-red 3s ease-in-out forwards;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "zustand": "https://aistudiocdn.com/zustand@^5.0.8",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.5",
+    "axios": "https://aistudiocdn.com/axios@^1.13.2",
+    "@heroicons/react/": "https://aistudiocdn.com/@heroicons/react@^2.2.0/",
+    "date-fns/": "https://aistudiocdn.com/date-fns@^4.1.0/",
+    "date-fns": "https://aistudiocdn.com/date-fns@^4.1.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
