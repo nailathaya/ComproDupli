@@ -118,4 +118,4 @@ class AIMatchResponse(BaseModel):
     fitScore: int
     summary: str
     matchingAspects: List[str]
-    aiReasons: List[str]
+    aiReason: str

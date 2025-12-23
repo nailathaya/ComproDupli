@@ -5,7 +5,7 @@ from langchain_core.documents import Document
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from dotenv import load_dotenv
-from data import candidates_dummy
+# from data import candidates_dummy
 
 # Load environment variables
 load_dotenv()
@@ -80,19 +80,12 @@ Ekspektasi Gaji: IDR {salary.get('min'):,} - {salary.get('max'):,}
 
 # --- FUNGSI UTAMA ---
 
-def generate_vector_store():
+def generate_vector_store(docs):
     # 1. Bersihkan database lama jika ada
     if os.path.exists(CHROMA_PATH):
         shutil.rmtree(CHROMA_PATH)
-        print(f"🗑️  Database lama di '{CHROMA_PATH}' telah dihapus.")
-
-    # 2. Konversi JSON ke Langchain Documents
-    print("⚙️  Mengonversi data kandidat...")
-    documents = process_candidates_to_documents(candidates_dummy)
-    pretty_print_documents(documents)
-    
-    # 3. Inisialisasi Model Embedding
-    print(f"🧠 Memuat Embedding Model: {MODEL_NAME}...")
+  
+    # print(f"🧠 Memuat Embedding Model: {MODEL_NAME}...")
     embedding_model = HuggingFaceEmbeddings(
         model_name=MODEL_NAME,
         model_kwargs={"device": "cpu"},
@@ -100,10 +93,10 @@ def generate_vector_store():
     )
 
     # 4. Simpan ke ChromaDB
-    print(f"💾 Menyimpan {len(documents)} vektor ke ChromaDB...")
+    
     try:
         Chroma.from_documents(
-            documents=documents,
+            documents=docs,
             embedding=embedding_model,
             persist_directory=CHROMA_PATH
         )
@@ -111,5 +104,25 @@ def generate_vector_store():
     except Exception as e:
         print(f"❌ Terjadi kesalahan: {e}")
 
-if __name__ == "__main__":
-    generate_vector_store()
+# def update_candidate_embedding(candidate: Dict):
+#     embedding_model = HuggingFaceEmbeddings(
+#         model_name=MODEL_NAME,
+#         model_kwargs={"device": "cpu"},
+#         encode_kwargs={"normalize_embeddings": True}
+#     )
+
+#     db = Chroma(
+#         persist_directory=CHROMA_PATH,
+#         embedding_function=embedding_model
+#     )
+
+#     # 1. Hapus embedding lama kandidat ini
+#     db.delete(where={"candidate_id": candidate["id"]})
+
+#     # 2. Buat embedding baru
+#     docs = process_candidates_to_documents([candidate])
+#     db.add_documents(docs)
+
+
+# # if __name__ == "__main__":
+# #     generate_vector_store()
