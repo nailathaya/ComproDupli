@@ -1,7 +1,7 @@
 
 
 export interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
   location: string;
@@ -13,7 +13,7 @@ export interface User {
 }
 
 export interface WorkExperience {
-  id:string;
+  id:number;
   jobTitle: string;
   companyName: string;
   startDate: string;
@@ -44,11 +44,10 @@ export interface RecruitmentStage {
 export interface ApplicationHistory {
   id: number;
   job_id: number;
-  position: string;
-  applied_date: string;
-  // status: 'Diterima' | 'Ditolak' | 'Interview' | 'Dalam Proses' | 'Pending';
+  applied_at: string;
   stages: RecruitmentStage[];
 }
+
 
 // Candidate type extends Profile
 // export interface Candidate extends Profile {

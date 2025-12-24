@@ -18,6 +18,20 @@ format(new Date(), 'dd MMMM yyyy', { locale: id });
 import { BriefcaseIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { getMyApplications } from '../services/api';
 
+const STAGE_ORDER: RecruitmentStage['name'][] = [
+  'Screening',
+  'Psikotest',
+  'Interview HR',
+  'Interview User',
+  'Penawaran',
+];
+
+const STAGE_STATUS: RecruitmentStage['status'][] = [
+  'Lolos',
+  'Tidak Lolos',
+  'Belum',
+];
+
 const HistoryPage: React.FC = () => {
   const [applications, setApplications] = useState<ApplicationHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,8 +123,8 @@ const HistoryPage: React.FC = () => {
                     line: 'bg-red-500',
                     text: 'text-red-700 font-semibold',
                 };
-            case 'Dalam Proses':
-            case 'Pending':
+            // case 'Dalam Proses':
+            // case 'Pending':
             case 'Belum':
             default:
                 return {
@@ -120,21 +134,57 @@ const HistoryPage: React.FC = () => {
                 };
         }
     };
+
+    const stage_status = (stages: RecruitmentStage[]): string => {
+        if (stages.some(stage => stage.status === 'Tidak Lolos')) {
+            return 'Tidak Lolos';
+        } else if (stages.every(stage => stage.status === 'Belum')) {
+            return 'Belum';
+        }
+    };
+    const getCurrentStageName = (
+        stages: RecruitmentStage[]
+        ): RecruitmentStage['name'] => {
+        const failedStage = stages.find(s => s.status === 'Tidak Lolos');
+        if (failedStage) return failedStage.name;
+
+        for (let i = STAGE_ORDER.length - 1; i >= 0; i--) {
+            const stage = stages.find(s => s.name === STAGE_ORDER[i]);
+            if (stage && stage.status === 'Lolos') {
+            return stage.name;
+            }
+        }
+
+        return 'Screening';
+    };
+
     
-    const getOverallStatusInfo = (status: ApplicationHistory['status']) => {
-        switch (status) {
-            case 'Diterima':
-                return { text: status, color: 'text-green-700 bg-green-100' };
-            case 'Interview':
+    const getOverallStatusInfo = (stages: RecruitmentStage[]) => {
+        if (stage_status(stages) === 'Tidak Lolos') {
+            return {
+            text: 'Tidak Lolos',
+            color: 'text-red-700 bg-red-100',
+            };
+        } else if (stages.every(stage => stage.status === 'Belum')) {
+            return {
+            text: 'Belum',
+            color: 'text-gray-700 bg-gray-200',
+            };
+        }
+        const stage = getCurrentStageName(stages);
+        switch (stage) {
+            case 'Screening':
+                return { text: stage, color: 'text-green-700 bg-green-100' };
+            case 'Psikotest':
                 return { text: "Tahap Interview", color: 'text-green-700 bg-green-100' };
-            case 'Ditolak':
-                 return { text: status, color: 'text-red-700 bg-red-100' };
-            case 'Dalam Proses':
-                 return { text: status, color: 'text-yellow-700 bg-yellow-100' };
-            case 'Pending':
-                 return { text: status, color: 'text-gray-700 bg-gray-200' };
+            case 'Interview HR':
+                 return { text: stage, color: 'text-red-700 bg-red-100' };
+            case 'Interview User':
+                 return { text: stage, color: 'text-yellow-700 bg-yellow-100' };
+            case 'Penawaran':
+                 return { text: stage, color: 'text-gray-700 bg-gray-200' };
             default:
-                 return { text: status, color: 'text-gray-700 bg-gray-200' };
+                 return { text: stage, color: 'text-gray-700 bg-gray-200' };
         }
     };
 
@@ -152,7 +202,8 @@ const HistoryPage: React.FC = () => {
             <div className="space-y-8">
                 {applications.length > 0 ? (
                     applications.map(app => {
-                        const overallStatus = getOverallStatusInfo(app.status);
+                        // const currentStage = getCurrentStageName(app.stages);
+                        const overallStatus = getOverallStatusInfo(app.stages);
                         let failed = false;
                         return (
                             <div key={app.id} id={`application-${app.id}`} className="bg-white shadow-md rounded-xl p-6 transition-colors duration-300">
