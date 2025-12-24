@@ -31,7 +31,7 @@ import { applyJob } from '../services/api';
 
 const JobCard: React.FC<{ job: Job }> = ({ job }) => {
   const { appliedJobIds, addAppliedJobId } = useJobStore();
-  const hasApplied = appliedJobIds.includes(Number(job.id));
+  const hasApplied = appliedJobIds.includes(job.id);
   const [isApplying, setIsApplying] = useState(false);
   console.log('job', job.id, 'hasApplied', hasApplied);
 
@@ -44,7 +44,7 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
 
       await applyJob(job.id);
 
-      addAppliedJobId(Number(job.id)); // ✅ PERSIST KE STORE
+      addAppliedJobId(job.id); // ✅ PERSIST KE STORE
       alert('Lamaran berhasil dikirim 🎉');
     } catch (err: any) {
       alert(err.message || 'Gagal melamar pekerjaan');
@@ -194,18 +194,14 @@ const JobBoardPage: React.FC = () => {
     const { filteredJobs, loading, fetchJobs, searchQuery, setSearchQuery } = useJobStore();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    useEffect(() => {
+useEffect(() => {
+  if (!localStorage.getItem("access_token")) return;
+
   const loadData = async () => {
     await fetchJobs();
-
-    try {
-      const apps = await getMyApplications();
-      const appliedIds = apps.map((a: any) => a.job_id);
-      useJobStore.getState().setAppliedJobIds(appliedIds);
-    } catch (e) {
-      // user belum login → aman
-      console.log('No application data');
-    }
+    const apps = await getMyApplications();
+    const appliedIds = apps.map((a: any) => Number(a.job_id));
+    useJobStore.getState().setAppliedJobIds(appliedIds);
   };
 
   loadData();
