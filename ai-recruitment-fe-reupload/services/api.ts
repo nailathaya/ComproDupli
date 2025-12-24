@@ -6,14 +6,34 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 /* =====================
    AUTH HEADER
 ===================== */
+// function authHeader() {
+//   const token = localStorage.getItem("token");
+//   return token ? { Authorization: `Bearer ${token}` } : {};
+// }
+
 function authHeader() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access_token"); // ✅ SAMA
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
 
 /* =====================
    AUTH
 ===================== */
+// export async function loginCandidate(credentials: {
+//   email: string;
+//   password: string;
+// }) {
+//   const res = await fetch(`${API_BASE_URL}/auth/login`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(credentials),
+//   });
+
+//   if (!res.ok) throw new Error("Login failed");
+//   return res.json();
+// }
+
 export async function loginCandidate(credentials: {
   email: string;
   password: string;
@@ -25,8 +45,15 @@ export async function loginCandidate(credentials: {
   });
 
   if (!res.ok) throw new Error("Login failed");
-  return res.json();
+
+  const data = await res.json();
+
+  // 🔥 SIMPAN TOKEN DI SINI
+  localStorage.setItem("access_token", data.access_token);
+
+  return data;
 }
+
 
 export async function registerCandidate(data: {
   name: string;
@@ -283,22 +310,22 @@ export async function getMyApplications() {
   return res.json();
 }
 
-export async function applyJob(jobId: number) {
+export async function applyJob(jobId: number | string) {
   const res = await fetch(`${API_BASE_URL}/applications`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...authHeader(),
+      ...authHeader(), // ✅ PAKAI SATU SUMBER
     },
-    body: JSON.stringify({
-      job_id: jobId, // INT
-    }),
+    body: JSON.stringify({ job_id: jobId }),
   });
 
   if (!res.ok) {
-    throw new Error("Failed to apply job");
+    const err = await res.json();
+    throw new Error(err.detail || "Not authenticated");
   }
 
   return res.json();
 }
+
 

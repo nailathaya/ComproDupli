@@ -4,27 +4,106 @@ import { Job, SelectedFilters } from '../types';
 import { SearchIcon, ChevronDownIcon, MenuIcon } from '../components/icons';
 import { FILTER_OPTIONS, MAX_SALARY } from '../constants';
 
+import { getMyApplications } from '../services/api';
+// import { useJobStore } from '../store/useJobStore';
+
 import { applyJob } from '../services/api';
 //
-const JobCard: React.FC<{ job: Job }> = ({ job }) => (
+// const JobCard: React.FC<{ job: Job }> = ({ job }) => (
+//     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
+//         <img src={job.logoUrl} alt={`${job.company} logo`} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+//         <div className="flex-grow">
+//             <h3 className="text-xl font-bold text-gray-800">{job.title}</h3>
+//             <p className="text-gray-600">{job.company} - {job.location}</p>
+//             <p className="text-sm text-gray-500 mt-1">IDR {job.salary.min.toLocaleString('id-ID')} - {job.salary.max.toLocaleString('id-ID')}</p>
+//             <div className="mt-3 flex flex-wrap gap-2">
+//                 <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">{job.jobLevel}</span>
+//                 <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded-full">{job.employmentType}</span>
+//             </div>
+//         </div>
+//         <div className="flex-shrink-0 text-right w-full sm:w-auto">
+//             <button onClick={() => applyJob(job.id)}
+//             className="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">Lamar</button>
+//             <p className="text-xs text-gray-400 mt-2">Diposting {job.postedDate}</p>
+//         </div>
+//     </div>
+// );
+
+const JobCard: React.FC<{ job: Job }> = ({ job }) => {
+  const { appliedJobIds, addAppliedJobId } = useJobStore();
+  const hasApplied = appliedJobIds.includes(Number(job.id));
+  const [isApplying, setIsApplying] = useState(false);
+  console.log('job', job.id, 'hasApplied', hasApplied);
+
+  const handleApply = async () => {
+    // ⛔ proteksi ganda
+    if (hasApplied || isApplying) return;
+
+    try {
+      setIsApplying(true); // ✅ KUNCI BUTTON
+
+      await applyJob(job.id);
+
+      addAppliedJobId(Number(job.id)); // ✅ PERSIST KE STORE
+      alert('Lamaran berhasil dikirim 🎉');
+    } catch (err: any) {
+      alert(err.message || 'Gagal melamar pekerjaan');
+    } finally {
+      setIsApplying(false); // ✅ BUKA KUNCI (tapi hasApplied sudah true)
+    }
+  };
+
+  return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
-        <img src={job.logoUrl} alt={`${job.company} logo`} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
-        <div className="flex-grow">
-            <h3 className="text-xl font-bold text-gray-800">{job.title}</h3>
-            <p className="text-gray-600">{job.company} - {job.location}</p>
-            <p className="text-sm text-gray-500 mt-1">IDR {job.salary.min.toLocaleString('id-ID')} - {job.salary.max.toLocaleString('id-ID')}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">{job.jobLevel}</span>
-                <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded-full">{job.employmentType}</span>
-            </div>
+      <img
+        src={job.logoUrl}
+        alt={`${job.company} logo`}
+        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+      />
+
+      <div className="flex-grow">
+        <h3 className="text-xl font-bold text-gray-800">{job.title}</h3>
+        <p className="text-gray-600">
+          {job.company} - {job.location}
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          IDR {job.salary.min.toLocaleString('id-ID')} -{' '}
+          {job.salary.max.toLocaleString('id-ID')}
+        </p>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">
+            {job.jobLevel}
+          </span>
+          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1 rounded-full">
+            {job.employmentType}
+          </span>
         </div>
-        <div className="flex-shrink-0 text-right w-full sm:w-auto">
-            <button onClick={() => applyJob(job.id)}
-            className="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">Lamar</button>
-            <p className="text-xs text-gray-400 mt-2">Diposting {job.postedDate}</p>
-        </div>
+      </div>
+
+      <div className="flex-shrink-0 text-right w-full sm:w-auto">
+        <button
+          onClick={handleApply}
+          disabled={hasApplied || isApplying}
+          className={`font-semibold px-6 py-2 rounded-lg transition-colors
+            ${
+              hasApplied
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : isApplying
+                ? 'bg-blue-400 text-white cursor-wait'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+        >
+          {hasApplied
+            ? 'Sudah Melamar'
+            : isApplying
+            ? 'Mengirim...'
+            : 'Lamar'}
+        </button>
+      </div>
     </div>
-);
+  );
+};
 
 const FilterButton: React.FC<{
     label: string;
@@ -116,8 +195,21 @@ const JobBoardPage: React.FC = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     useEffect(() => {
-        fetchJobs(); // ⬅️ real backend
-    }, []);
+  const loadData = async () => {
+    await fetchJobs();
+
+    try {
+      const apps = await getMyApplications();
+      const appliedIds = apps.map((a: any) => a.job_id);
+      useJobStore.getState().setAppliedJobIds(appliedIds);
+    } catch (e) {
+      // user belum login → aman
+      console.log('No application data');
+    }
+  };
+
+  loadData();
+}, []);
 
     return (
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
