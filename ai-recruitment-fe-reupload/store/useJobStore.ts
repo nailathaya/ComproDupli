@@ -50,37 +50,37 @@ export const useJobStore = create<JobState>((set, get) => ({
     })),
 
   fetchJobs: async () => {
-    set({ loading: true });
-    try {
-      const data = await getPublicJobs();
+  set({ loading: true });
+  try {
+    const data = await getPublicJobs();
 
-      // mapping backend → frontend Job type
-      const mappedJobs: Job[] = data.map((j: any) => ({
-        id: j.id,
-        title: j.title,
-        company: j.department || 'Perusahaan',
-        location: j.location,
-        employmentType: j.employment_type,
-        jobLevel: 'Entry Level', // bisa kamu derive nanti
-        jobFunction: j.department,
-        education: j.min_education,
-        salary: {
-          min: j.salary_min ?? 0,
-          max: j.salary_max ?? 0,
-        },
-        postedDate: j.created_at,
-        logoUrl: '/logo-default.png',
-        status: j.status,
-      }));
+    const mappedJobs: Job[] = data.map((j: any) => ({
+      id: j.id,
+      title: j.title,
+      // company: j.department ?? 'Perusahaan',
+      location: j.location,
+      employmentType: j.employment_type,
+      jobLevel: 'Entry Level', // sementara (bisa derive dari experience)
+      jobFunction: j.department,
+      education: j.min_education,
+      salary: {
+        min: 0, // backend belum ada
+        max: 0,
+      },
+      postedDate: j.created_at,
+      logoUrl: '/logo-default.png',
+      status: j.status === 'published' ? 'Published' : 'Closed',
+    }));
 
-      set({
-        jobs: mappedJobs,
-        filteredJobs: mappedJobs,
-      });
-    } finally {
-      set({ loading: false });
-    }
-  },
+    set({
+      jobs: mappedJobs,
+      filteredJobs: mappedJobs,
+    });
+  } finally {
+    set({ loading: false });
+  }
+},
+
 
   setSearchQuery: (q) => {
     set({ searchQuery: q });

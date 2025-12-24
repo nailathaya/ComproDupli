@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import List, Optional
 from datetime import datetime, date
 
@@ -88,14 +88,40 @@ class JobPostingResponse(BaseModel):
     department: str
     employment_type: str
     location: str
+    description: str
+    min_education: str
+    min_experience_years: int
+    closing_date: Optional[date]
+    required_candidates: int
     status: str
 
-    closing_date: Optional[date]
-    created_at: datetime
+    skills: List[str]
+    certifications: List[str]
 
-    model_config = {
-        "from_attributes": True
-    }
+    @validator("skills", pre=True)
+    def map_skills(cls, v):
+        """
+        Convert:
+        [JobSkill(skill_name="Python"), JobSkill(skill_name="FastAPI")]
+        → ["Python", "FastAPI"]
+        """
+        if not v:
+            return []
+        return [s.skill_name for s in v]
+
+    @validator("certifications", pre=True)
+    def map_certs(cls, v):
+        """
+        Convert:
+        [JobCertification(certification_name="AWS")]
+        → ["AWS"]
+        """
+        if not v:
+            return []
+        return [c.certification_name for c in v]
+
+    class Config:
+        orm_mode = True
 
 class CandidateListItemResponse(BaseModel):
     id: int

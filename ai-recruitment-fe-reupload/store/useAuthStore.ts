@@ -25,31 +25,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   // ======================
   // LOGIN (BACKEND CONNECT)
   // ======================
-//   login: async (credentials) => {
-//   try {
-//     set({ loading: true, error: null });
-
-//     const res = await loginCandidate(credentials);
-
-//     set({
-//       isAuthenticated: true,
-//       user: res.user,
-      
-//       token: res.access_token,
-//       loading: false,
-//     });
-
-//     localStorage.setItem('token', res.access_token);
-
-//     return res; // ⬅️ PENTING
-//   } catch (err) {
-//     set({
-//       error: 'Login gagal',
-//       loading: false,
-//     });
-//     throw err;
-//   }
-// },
 
   login: async (credentials) => {
   set({ loading: true, error: null });

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useHrdStore } from '../../store/useHrdStore';
 import { JobPosition, JobRequirements } from '../../types';
 import { ChevronLeftIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { createJobPosting } from '../../services/api';
+import { createJobPosting,updateJobPosting } from '../../services/api';
 
 
 const INITIAL_REQUIREMENTS: JobRequirements = {
@@ -13,19 +13,17 @@ const INITIAL_REQUIREMENTS: JobRequirements = {
     skills: []
 };
 
-const INITIAL_JOB: Partial<JobPosition> = {
-    title: '',
-    department: '',
-    location: '',
-    employment_type: 'Full Time',
-    description: '',
-    salary: { min: 0, max: 0 },
-    closing_date: '',
-    required_candidates: 1,
-    status: 'Draft',
-    // requirements: INITIAL_REQUIREMENTS,
-    skills: [] // Sync with requirements.skills
+const INITIAL_JOB = {
+  title: '',
+  department: '',
+  location: '',
+  employmentType: 'Full Time',
+  jobDescription: '',
+  closingDate: '',
+  openPositions: 1,
+  status: 'Draft',
 };
+
 
 const JobFormPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -33,7 +31,7 @@ const JobFormPage: React.FC = () => {
     // const { addJob, updateJob, getJobById } = useHrdStore();
     const { jobPostings } = useHrdStore();
     
-    const [formData, setFormData] = useState<Partial<JobPosition>>(INITIAL_JOB);
+    const [formData, setFormData] = useState<typeof INITIAL_JOB>(INITIAL_JOB);
     const [requirements, setRequirements] = useState<JobRequirements>(INITIAL_REQUIREMENTS);
     const [newCert, setNewCert] = useState('');
     const [newSkill, setNewSkill] = useState('');
@@ -136,43 +134,39 @@ const JobFormPage: React.FC = () => {
     };
 
     const handleSubmit = async (status: 'Draft' | 'Published') => {
-    if (status === 'Published' && !validate()) {
-        window.scrollTo(0, 0);
-        return;
+  if (status === 'Published' && !validate()) return;
+
+  setIsSubmitting(true);
+
+  const payload = {
+    title: formData.title!,
+    department: formData.department!,
+    employment_type: formData.employmentType!,
+    location: formData.location!,
+    description: formData.jobDescription!,
+    min_education: requirements.education,
+    min_experience_years: requirements.experience_years,
+    closing_date: formData.closingDate || undefined,
+    required_candidates: formData.openPositions || 1,
+    skills: requirements.skills,
+    certifications: requirements.certifications,
+    status: status.toLowerCase(),
+  };
+
+  try {
+    if (id) {
+      // 🔥 EDIT MODE
+      await updateJobPosting(id, payload);
+    } else {
+      // 🔥 CREATE MODE
+      await createJobPosting(payload);
     }
 
-    setIsSubmitting(true);
-
-    try {
-        await createJobPosting({
-            title: formData.title!,
-            department: formData.department!,
-            employment_type: formData.employmentType!,
-            location: formData.location!,
-            description: formData.jobDescription!,
-            min_education: requirements.education,
-            min_experience_years: requirements.experience_years,
-            closing_date: formData.closingDate
-            ? formData.closingDate.split('/').reverse().join('-')
-            : undefined,
-            required_candidates: formData.openPositions || 1,
-
-            // 🔥 WAJIB
-            skills: requirements.skills,
-            certifications: requirements.certifications,
-        });
-
-
-        navigate('/hrd/jobs');
-    } catch (err) {
-        console.error(err);
-        alert("Gagal menyimpan lowongan");
-    } finally {
-        setIsSubmitting(false);
-    }
-    };
-
-
+    navigate('/hrd/jobs');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
     const inputClass = (name: string) => `w-full border rounded-lg px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${errors[name] ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'}`;
     const labelClass = "block text-sm font-semibold text-gray-700 mb-1";

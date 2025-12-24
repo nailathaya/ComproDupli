@@ -111,24 +111,69 @@ export interface Profile {
 }
 
 export interface Job {
-    id: number;
-    title: string;
-    company: string;
-    location: string;
-    jobLevel: 'Internship' | 'Entry Level' | 'Associate' | 'Mid-Senior' | 'Director';
-    employmentType: 'Full Time' | 'Part Time' | 'Freelance' | 'Contractual' | 'Internship';
-    jobFunction: string;
-    education: string;
-    salary: {
-        min: number;
-        max: number;
-    };
-    postedDate: string;
-    logoUrl: string;
-    // HRD specific properties
-    applicants?: number; 
-    status?: 'Aktif' | 'Ditutup' | 'Draft' | 'Published' | 'Closed';
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  employmentType: 'Full Time' | 'Part Time' | 'Freelance' | 'Contractual' | 'Internship';
+  jobLevel: 'Internship' | 'Entry Level' | 'Associate' | 'Mid-Senior' | 'Director';
+  jobFunction: string;
+  education: string;
+  salary: {
+    min: number;
+    max: number;
+  };
+  postedDate: string;
+  logoUrl: string;
+  status?: 'published' | 'closed';
 }
+
+
+export interface JobListItem {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  jobLevel: 'Internship' | 'Entry Level' | 'Associate' | 'Mid-Senior' | 'Director';
+  employmentType: 'Full Time' | 'Part Time' | 'Freelance' | 'Contractual' | 'Internship';
+  jobFunction: string;
+  education: string;
+  salary: {
+    min: number;
+    max: number;
+  };
+  postedDate: string;
+  logoUrl: string;
+  status?: 'Aktif' | 'Published';
+}
+
+export interface JobDetail {
+  id: number;
+  title: string;
+  department: string;
+  location: string;
+  employmentType: string;
+
+  description: string;
+
+  requirements: {
+    education: string;
+    experience_years: number;
+    skills: string[];
+    certifications: string[];
+  };
+
+  salary?: {
+    min: number;
+    max: number;
+  };
+
+  closingDate?: string;
+  openPositions: number;
+  status: 'Draft' | 'Published' | 'Closed';
+  createdAt: string;
+}
+
 
 export interface JobRequirements {
     education: string;

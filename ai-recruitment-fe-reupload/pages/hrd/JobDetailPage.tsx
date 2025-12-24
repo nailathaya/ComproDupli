@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHrdStore } from '../../store/useHrdStore';
-import { JobPosition } from '../../types';
+import { JobDetail, JobPosition } from '../../types';
 import { ChevronLeftIcon, PencilIcon, BriefcaseIcon, MapPinIcon, CalendarIcon, AcademicCapIcon, UserGroupIcon, BuildingOffice2Icon, CheckBadgeIcon } from '@heroicons/react/24/outline';
-import format from 'date-fns/format';
-import idLocale from 'date-fns/locale/id';
+import {format} from 'date-fns/format';
+import {id as idLocale} from 'date-fns/locale/id';
 
 const JobDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { getJobById } = useHrdStore();
-    const [job, setJob] = useState<JobPosition | undefined>(undefined);
+    const [job, setJob] = useState<JobDetail | undefined>(undefined);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -72,7 +72,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h2 className="text-xl font-bold text-black mb-4">Deskripsi Pekerjaan</h2>
                         <div className="prose max-w-none text-gray-700 whitespace-pre-line">
-                            {job.jobDescription}
+                            {job.description}
                         </div>
                     </div>
 

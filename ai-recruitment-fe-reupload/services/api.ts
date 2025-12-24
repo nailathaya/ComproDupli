@@ -6,10 +6,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 /* =====================
    AUTH HEADER
 ===================== */
-// function authHeader() {
-//   const token = localStorage.getItem("token");
-//   return token ? { Authorization: `Bearer ${token}` } : {};
-// }
 
 function authHeader() {
   const token = localStorage.getItem("access_token"); // ✅ SAMA
@@ -20,19 +16,6 @@ function authHeader() {
 /* =====================
    AUTH
 ===================== */
-// export async function loginCandidate(credentials: {
-//   email: string;
-//   password: string;
-// }) {
-//   const res = await fetch(`${API_BASE_URL}/auth/login`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(credentials),
-//   });
-
-//   if (!res.ok) throw new Error("Login failed");
-//   return res.json();
-// }
 
 export async function loginCandidate(credentials: {
   email: string;
@@ -327,5 +310,20 @@ export async function applyJob(jobId: number | string) {
 
   return res.json();
 }
+
+export async function updateJobPosting(id: string, payload: any) {
+  const res = await fetch(`${API_BASE_URL}/job-postings/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) throw new Error('Failed to update job');
+  return res.json();
+}
+
 
 
