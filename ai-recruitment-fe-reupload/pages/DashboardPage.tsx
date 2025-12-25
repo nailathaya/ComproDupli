@@ -244,17 +244,19 @@ const SalaryExpectation: React.FC<{ profile: Profile, setProfile: React.Dispatch
                     <div>
                         <label className="text-sm font-medium text-gray-500">Minimal (per bulan)</label>
                         <input type="number"
-                            value={salary.min ?? 0}
+                            value={salary.min ?? Number("")}
                             onChange={(e) =>
-                                setSalary((s) => ({ ...s, min: Number(e.target.value) || 0 }))
+                                setSalary((s) => ({ ...s, min: Number(e.target.value) || "" }))
                             } className={`mt-1 ${formInputClass}`}/>
+
+                            
                     </div>
                      <div>
                         <label className="text-sm font-medium text-gray-500">Maksimal (per bulan)</label>
                         <input type="number"
-                            value={salary.max ?? 0}
+                            value={salary.max ?? Number("")}
                             onChange={(e) =>
-                                setSalary((s) => ({ ...s, max: Number(e.target.value) || 0 }))
+                                setSalary((s) => ({ ...s, max: Number(e.target.value) || "" }))
                             } className={`mt-1 ${formInputClass}`}/>
                     </div>
                 </div>

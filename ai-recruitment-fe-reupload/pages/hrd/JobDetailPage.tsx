@@ -258,7 +258,7 @@ const JobDetailPage: React.FC = () => {
       {/* HEADER */}
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-black mb-1">
-          Detail Lowongan
+          {job.title}
         </h1>
         <p className="text-gray-500">
           {job.department} · {job.location}

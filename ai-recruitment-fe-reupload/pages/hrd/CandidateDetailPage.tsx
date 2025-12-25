@@ -16,6 +16,8 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 
+import profilePicture from '../../components/profile-kandidat.webp';
+
 import { format } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
@@ -315,7 +317,7 @@ const CandidateDetailPage: React.FC = () => {
 
             <div id="profile_info" className="bg-white shadow-sm rounded-xl p-6 mb-6">
                 <div className="flex flex-col sm:flex-row items-start gap-6">
-                    <img src={candidate.user?.avatarUrl || '/avatar-placeholder.png'}
+                    <img src={profilePicture}
                     alt={candidate.user?.name || 'Candidate'} className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 flex-shrink-0" />
                     <div className="flex-grow">
                         <h1 className="text-3xl font-bold text-black">{candidate.user?.name}</h1>

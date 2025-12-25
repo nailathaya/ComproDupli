@@ -59,7 +59,7 @@ class ApplicationStageResponse(BaseModel):
     status: str
 
 class AIScreeningResponse(BaseModel):
-    status: str
+    status: str # pass, review, reject
     confidence: Optional[float]
     reason: Optional[str]
 
@@ -69,8 +69,6 @@ class ApplicationHistoryResponse(BaseModel):
     position: str
     stages: List[ApplicationStageResponse]
     aiScreening: Optional[AIScreeningResponse]
-
-
 
 class CandidateResponse(BaseModel):
     id: str

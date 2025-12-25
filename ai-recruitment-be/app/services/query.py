@@ -212,7 +212,7 @@ def score_candidates_with_llm(job_description: str, candidates_data: List[Dict])
     """
     Phase 2: LLM Scoring
     """
-    print(candidates_data)
+    # print(candidates_d?ata)
     if not candidates_data:
         return []
 

@@ -50,6 +50,7 @@ def get_job_detail(job_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Job not found")
 
     return {
+        "title": job.title,
         "description": job.description,
         "min_education": job.min_education,
         "min_experience_years": job.min_experience_years,

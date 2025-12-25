@@ -107,6 +107,8 @@ const StageStatusBadge: React.FC<{
 const CandidateList: React.FC = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const ITEMS_PER_PAGE = 5;
+    const [currentPage, setCurrentPage] = React.useState(1)
     // const position = searchParams.get('position') || '';
     const {
       candidates,
@@ -116,13 +118,20 @@ const CandidateList: React.FC = () => {
       updateStageStatus,
     } = useHrdStore();
 
+    
+
     useEffect(() => {
-      if (candidates.length === 0) fetchCandidates();
-      if (jobPostings.length === 0) fetchJobPostings();
-    }, [candidates.length, jobPostings.length, fetchCandidates, fetchJobPostings]);
+      fetchCandidates();
+      fetchJobPostings();
+    }, [fetchCandidates, fetchJobPostings]);
 
     const jobId = searchParams.get('jobId') || '';
     const selectedJob = jobPostings.find(j => String(j.id) === jobId);
+
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [jobId]);
+
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const id = e.target.value;
@@ -130,18 +139,35 @@ const CandidateList: React.FC = () => {
     };
 
 const filteredData = useMemo(() => {
-  return candidates
-    .map(cand => {
-      const activeApp = jobId
-        ? cand.applicationHistory.find(a => String(a.job_id) === jobId)
-        : cand.applicationHistory[0];
 
-      if (!activeApp) return null;
+  const rows: any[] = [];
 
-      return { ...cand, activeApp };
-    })
-    .filter(Boolean);
+  candidates.forEach(cand => {
+    // kalau filter job aktif → hanya application itu
+    const apps = jobId
+      ? cand.applicationHistory.filter(a => String(a.job_id) === jobId)
+      : cand.applicationHistory;
+
+    apps.forEach(app => {
+      rows.push({
+        ...cand,
+        activeApp: app,
+      });
+    });
+  });
+
+  return rows;
 }, [candidates, jobId]);
+
+const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
+const paginatedData = useMemo(() => {
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
+  return filteredData.slice(start, end);
+}, [filteredData, currentPage]);
+
+
 
     return (
         <div className="flex flex-col h-full">
@@ -197,11 +223,11 @@ const filteredData = useMemo(() => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
-                            {filteredData.map((cand) => {
+                            {paginatedData.map((cand) => {
                                 const { activeApp } = cand;
 
                                 return (
-                                    <tr key={cand.id} className="hover:bg-blue-50/30 transition-colors">
+                                    <tr key={`${cand.id}-${cand.activeApp.id}`} className="hover:bg-blue-50/30 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <img className="h-9 w-9 rounded-full object-cover border-2 border-white shadow-sm" src={profilePicture} alt="" />
@@ -213,7 +239,7 @@ const filteredData = useMemo(() => {
                                         </td>
                                         {!jobId && (
                                             <td className="px-6 py-4 whitespace-nowrap text-xs font-semibold text-gray-600">
-                                                {cand.positionApplied}
+                                                {activeApp.position}
                                             </td>
                                         )}
                                         {STAGE_ORDER.map((stageName, idx) => {
@@ -226,13 +252,13 @@ const filteredData = useMemo(() => {
                                                   {stageName === 'Screening' ? (
                                                     <div className="flex items-center gap-1">
                                                       {/* LABEL AI (HANYA INFO) */}
-                                                      {cand.aiScreening ? (
-                                                        <AIScreeningBullet ai={cand.aiScreening} />
+                                                      {activeApp?.aiScreening ? (
+                                                        <AIScreeningBullet ai={activeApp.aiScreening} />
                                                       ) : (
                                                         <div
-                                                        className="w-2.5 h-2.5 rounded-full bg-gray-300"
-                                                        title={'Pending'}
-                                                        ></div>
+                                                          className="w-2.5 h-2.5 rounded-full bg-gray-300"
+                                                          title="AI belum memproses"
+                                                        />
                                                       )}
 
                                                       {/* KEPUTUSAN HRD */}
@@ -276,9 +302,35 @@ const filteredData = useMemo(() => {
                                                 <EyeIcon className="h-5 w-5" />
                                             </button>
                                         </td>
+                                        
                                     </tr>
+                                  
                                 );
                             })}
+                            <div className="flex items-center justify-between px-6 py-4 border-t bg-white">
+  <p className="text-xs text-gray-500">
+    Halaman {currentPage} dari {totalPages}
+  </p>
+
+  <div className="flex gap-2">
+    <button
+      disabled={currentPage === 1}
+      onClick={() => setCurrentPage(p => p - 1)}
+      className="px-3 py-1 text-sm rounded border disabled:opacity-40 hover:bg-gray-50"
+    >
+      Prev
+    </button>
+
+    <button
+      disabled={currentPage === totalPages}
+      onClick={() => setCurrentPage(p => p + 1)}
+      className="px-3 py-1 text-sm rounded border disabled:opacity-40 hover:bg-gray-50"
+    >
+      Next
+    </button>
+  </div>
+</div>
+
                         </tbody>
                     </table>
                 </div>

@@ -178,6 +178,7 @@ def ai_match(
     )
 
     if not applications:
+        # print("no applications")
         return []
 
     job = applications[0].job
@@ -218,6 +219,8 @@ def ai_match(
                 for cert in certificates
             ]
         })
+    
+    print(candidates_payload)
 
     # 🔥 SEMANTIC MATCHING TANPA CHROMA
     ranked_candidates = match_candidates(job_description, candidates_payload)
@@ -237,12 +240,15 @@ def ai_match(
     )
 
     for r in sorted_results:
+        # print("R",r["id"], type(r["id"]))
+        # print([app.user.id for app in applications], type(applications[0].user.id))
         application = next(
-            (app for app in applications if app.user.id == r["id"]),
+            (app for app in applications if app.user.id == int(r["id"])),
             None
         )
 
         if not application:
+            # print("application not foundAAAAAAAAAAAAAAAAA")
             continue
 
         existing = (
@@ -252,12 +258,15 @@ def ai_match(
         )
 
         if existing:
+            # print("existing")
             existing.fit_score = r["skor"]
             existing.summary = r["analisis_singkat"]
             existing.recommendation_status = map_llm_recommendation(r["rekomendasi"])
             existing.confidence = r["skor"] / 100
             existing.reason = r["rekomendasi"]
+
         else:
+            # print("else")
             db.add(
                 AIScreeningResult(
                     application_id=application.id,
