@@ -12,5 +12,6 @@ class Document(Base):
     file_name = Column(String(255))
     file_url = Column(String(255))
     uploaded_at = Column(Date)
+    description = Column(Text, nullable=True)
 
     user = relationship("User", back_populates="documents")

@@ -108,16 +108,23 @@ export const useHrdStore = create<HrdState>((set, get) => ({
      👥 FETCH CANDIDATES
   ========================= */
   fetchCandidates: async () => {
-    set({ loading: true });
-    try {
-      const data = await getCandidates();
-      set({ candidates: data });
-    } catch (err) {
-      console.error('Failed to fetch candidatesdsdsds', err);
-    } finally {
-      set({ loading: false });
-    }
-  },
+  set({ loading: true });
+  try {
+    const data = await getCandidates();
+
+    set({
+      candidates: data.map((cand: any) => ({
+        ...cand,
+        aiScreening: cand.ai_screening ?? cand.aiScreening ?? null,
+      })),
+    });
+
+  } catch (err) {
+    console.error('Failed to fetch candidates', err);
+  } finally {
+    set({ loading: false });
+  }
+},
 
   /* =========================
      💼 FETCH JOB POSTINGS (INI KUNCI 🔥)

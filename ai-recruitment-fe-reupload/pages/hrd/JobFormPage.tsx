@@ -278,11 +278,17 @@ const JobFormPage: React.FC = () => {
 
                         <div>
                             <label className={labelClass}>Minimal Pengalaman (Tahun)</label>
-                            <input 
-                                type="number" 
-                                min="0" 
-                                value={requirements.experience_years} 
-                                onChange={(e) => handleRequirementChange('experience_years', parseInt(e.target.value) || 0)} 
+                            <input
+                                type="number"
+                                min="0"
+                                value={requirements.experience_years === 0 ? '' : requirements.experience_years}
+                                onChange={(e) => {
+                                const value = e.target.value;
+                                handleRequirementChange(
+                                    'experience_years',
+                                    value === '' ? 0 : Number(value)
+                                );
+                                }}
                                 className={inputClass('experience_years')}
                             />
                         </div>

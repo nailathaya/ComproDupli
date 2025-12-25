@@ -57,7 +57,7 @@ export async function registerCandidate(data: {
    CANDIDATE
 ===================== */
 export async function getCandidates() {
-  const res = await fetch(`${API_BASE_URL}/candidates/`, {
+  const res = await fetch(`${API_BASE_URL}/candidates/management`, {
     headers: authHeader(),
   });
 
@@ -206,6 +206,13 @@ export async function saveDocuments(
   candidateId: number,
   documents: Document[]
 ) {
+  const payload = documents.map((d) => ({
+    type: d.type,
+    file_name: d.file_name,
+    file_url: d.file_url,
+    description: d.description ?? null,
+    fileSize: d.fileSize ?? null,
+  }));
   const res = await fetch(
     `${API_BASE_URL}/candidates/${candidateId}/documents`,
     {
@@ -214,7 +221,7 @@ export async function saveDocuments(
         "Content-Type": "application/json",
         ...authHeader(),
       },
-      body: JSON.stringify(documents),
+      body: JSON.stringify(payload),
     }
   );
 
@@ -324,6 +331,25 @@ export async function updateJobPosting(id: string, payload: any) {
   if (!res.ok) throw new Error('Failed to update job');
   return res.json();
 }
+
+export async function getJobDetail(jobId: string | number) {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/job-postings/${jobId}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch job detail');
+  }
+
+  return res.json();
+}
+
 
 
 

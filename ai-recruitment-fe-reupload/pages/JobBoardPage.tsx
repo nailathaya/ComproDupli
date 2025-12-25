@@ -3,6 +3,7 @@ import { useJobStore } from '../store/useJobStore';
 import { Job, SelectedFilters } from '../types';
 import { SearchIcon, ChevronDownIcon, MenuIcon } from '../components/icons';
 import { FILTER_OPTIONS, MAX_SALARY } from '../constants';
+import companyLogo from '../components/company_logo.png';
 
 import { getMyApplications } from '../services/api';
 
@@ -36,8 +37,8 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
       <img
-        src={job.logoUrl}
-        alt={`${job.company} logo`}
+        src={companyLogo}
+        // alt={`${job.company} logo`}
         className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
       />
 
@@ -46,10 +47,10 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
         <p className="text-gray-600">
           {job.company} - {job.location}
         </p>
-        <p className="text-sm text-gray-500 mt-1">
+        {/* <p className="text-sm text-gray-500 mt-1">
           IDR {job.salary.min.toLocaleString('id-ID')} -{' '}
           {job.salary.max.toLocaleString('id-ID')}
-        </p>
+        </p> */}
 
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">
@@ -151,7 +152,7 @@ const JobFilters: React.FC = () => {
                 {FILTER_OPTIONS.jobFunction.map(func => <FilterButton key={func} label={func} filterType="jobFunction" value={func} />)}
             </FilterSection>
 
-            <div className="py-4 border-b">
+            {/* <div className="py-4 border-b">
                 <h4 className="font-semibold mb-3 text-gray-700">Gaji (Maksimal per bulan)</h4>
                 <input
                     type="range"
@@ -165,7 +166,7 @@ const JobFilters: React.FC = () => {
                 <div className="text-center mt-2 font-medium text-gray-600">
                     IDR {salaryRange[1].toLocaleString('id-ID')}
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 };
@@ -176,6 +177,7 @@ const JobBoardPage: React.FC = () => {
 
 useEffect(() => {
   const loadData = async () => {
+    console.log('🔥 JobBoardPage mounted');
     await fetchJobs();
 
     if (localStorage.getItem("access_token")) {

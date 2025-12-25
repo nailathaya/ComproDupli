@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey
+from sqlalchemy import Column, Integer, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -9,7 +9,7 @@ class ApplicationStage(Base):
 
     application_id = Column(
         Integer,
-        ForeignKey("applications.id"),
+        ForeignKey("applications.id", ondelete="CASCADE"),
         nullable=False,
     )
 
@@ -26,13 +26,8 @@ class ApplicationStage(Base):
     )
 
     status = Column(
-    Enum(
-        "Belum",
-        "Lolos",
-        "Tidak Lolos",
-        name="stage_status_enum",
-    ),
-    default="Belum",
-)
+        Enum("Belum", "Lolos", "Tidak Lolos", name="stage_status_enum"),
+        default="Belum",
+    )
 
     application = relationship("Application", back_populates="stages")

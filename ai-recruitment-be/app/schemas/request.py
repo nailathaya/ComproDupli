@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import date
+from pydantic import BaseModel, ConfigDict
+
 
 class CandidateDetailRequest(BaseModel):
     candidate_id: int
@@ -50,11 +52,27 @@ class SalaryRequest(BaseModel):
     min: int
     max: int
 
+# class DocumentRequest(BaseModel):
+#     type: str
+#     name: str
+#     url: Optional[str] = None
+#     description: Optional[str] = None
+#     class Config:
+#         extra = "ignore"
+
 class DocumentRequest(BaseModel):
     type: str
-    name: str
-    url: Optional[str] = None
+    file_name: str
+    file_url: str
+
     fileSize: Optional[int] = None
+    description: Optional[str] = None
+
+    # dikirim frontend tapi tidak disimpan
+    id: Optional[str] = None
+    uploadedAt: Optional[str] = None
+
+    model_config = ConfigDict(extra="ignore")
 
 class JobPostingCreateRequest(BaseModel):
     title: str

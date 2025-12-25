@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useHrdStore } from '../../store/useHrdStore';
 import { AIScreeningStatus,AIScreeningRecommendation, RecruitmentStage } from '../../types';
 import { EyeIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import profilePicture from '../../components/profile-kandidat.webp';
 
 const STAGE_ORDER = ['Screening', 'Psikotest', 'Interview HR', 'Interview User', 'Penawaran'];
 
@@ -206,7 +207,7 @@ const filteredData = useMemo(() => {
                                     <tr key={cand.id} className="hover:bg-blue-50/30 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <img className="h-9 w-9 rounded-full object-cover border-2 border-white shadow-sm" src={cand.user.avatarUrl} alt="" />
+                                                <img className="h-9 w-9 rounded-full object-cover border-2 border-white shadow-sm" src={profilePicture} alt="" />
                                                 <div className="ml-3">
                                                     <div className="text-sm font-bold text-gray-900">{cand.user.name}</div>
                                                     <div className="text-[10px] text-gray-400">{cand.user.email}</div>

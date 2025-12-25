@@ -212,6 +212,7 @@ def score_candidates_with_llm(job_description: str, candidates_data: List[Dict])
     """
     Phase 2: LLM Scoring
     """
+    print(candidates_data)
     if not candidates_data:
         return []
 
@@ -236,6 +237,7 @@ def score_candidates_with_llm(job_description: str, candidates_data: List[Dict])
     1. Kecocokan Skill yang Dibutuhkan.
     2. Kesesuaian Pengalaman Kerja.
     3. Ekspektasi Gaji vs Kualifikasi.
+    4. Sertifikasi Profesional Nilai Plus (jika ada).
 
     Output WAJIB format JSON:
     {

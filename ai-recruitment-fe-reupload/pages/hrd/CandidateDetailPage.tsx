@@ -126,12 +126,12 @@ const DocumentCard: React.FC<{ doc: CandidateDetail['documents'][0] }> = ({ doc 
             <DocumentTextIcon className="h-6 w-6 text-gray-500 flex-shrink-0" />
             <div className="flex-grow min-w-0">
                 <p className="font-semibold text-black truncate">{doc.name}</p>
-                <p className="text-xs text-gray-400">Diunggah {format(new Date(doc.uploadedAt), 'dd MMM yyyy', { locale: idLocale })}</p>
+                <p className="text-xs text-gray-400">{doc.file_name}</p>
             </div>
         </div>
-        <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex-shrink-0" aria-label="Download">
+        {/* <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex-shrink-0" aria-label="Download">
             <ArrowDownTrayIcon className="h-5 w-5" />
-        </button>
+        </button> */}
     </div>
 );
 
@@ -149,28 +149,80 @@ const ActivityItem: React.FC<{ activity: CandidateDetail['activity'][0], isLast:
 );
 
 const ApplicationHistorySection: React.FC<{ applications: CandidateDetail['applicationHistory'] }> = ({ applications }) => {
-    const getStatusClass = (status: CandidateDetail['applicationHistory'][0]['status']) => {
-        switch (status) {
-            case 'Diterima':
-            case 'Interview':
-                return 'bg-green-100 text-green-800';
-            case 'Ditolak':
-                return 'bg-red-100 text-red-800';
-            case 'Dalam Proses':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'Pending':
-                return 'bg-gray-100 text-gray-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
+    const STAGE_ORDER = [
+    'Screening',
+    'Psikotest',
+    'Interview HR',
+    'Interview User',
+    'Penawaran',
+    ] as const;
+
+    const getLatestStage = (stages: ApplicationHistory['stages']) => {
+    // fallback default
+    let latestStage = {
+        name: 'Screening',
+        status: 'Belum',
     };
+
+    if (!stages || stages.length === 0) {
+        return latestStage;
+    }
+
+    // mapping stage name → status
+    const stageMap = new Map(
+        stages.map(stage => [stage.name, stage.status])
+    );
+
+    for (const stageName of STAGE_ORDER) {
+        const status = stageMap.get(stageName);
+
+        if (!status || status === 'Belum') {
+        // belum dikerjakan → ini stage aktif
+        return {
+            name: stageName,
+            status: 'Belum',
+        };
+        }
+
+        if (status === 'Tidak Lolos') {
+        // gagal → stop di sini
+        return {
+            name: stageName,
+            status: 'Tidak Lolos',
+        };
+        }
+
+        // status === 'Lolos'
+        latestStage = {
+        name: stageName,
+        status: 'Lolos',
+        };
+    }
+
+    // kalau semua lolos sampai akhir
+    return latestStage;
+    };
+
+
+    const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'Lolos':
+        return 'bg-green-100 text-green-800';
+      case 'Tidak Lolos':
+        return 'bg-red-100 text-red-800';
+      default: // Belum
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
     return (
         <SectionCard title="Riwayat Lamaran Pekerjaan" icon={<ClockIcon className="h-5 w-5 text-gray-500" />}>
             <div className="space-y-4">
                 {applications.length > 0 ? (
                     [...applications].sort((a, b) => new Date(b.applied_date).getTime() - new Date(a.applied_date).getTime())
-                        .map(app => (
+                        .map(app => {
+                            const latestStage = getLatestStage(app.stages);
+                            return (
                             <div key={app.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                                 <div>
                                     <p className="font-bold text-black">{app.position}</p>
@@ -179,12 +231,12 @@ const ApplicationHistorySection: React.FC<{ applications: CandidateDetail['appli
                                     </p>
                                 </div>
                                 <div className="flex-shrink-0">
-                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusClass(app.status)}`}>
-                                        {app.status}
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(latestStage.status)}`}>
+                                        {latestStage.name}
                                     </span>
                                 </div>
                             </div>
-                        ))
+                        )})
                 ) : (
                     <p className="text-sm text-gray-500">Kandidat belum pernah melamar pekerjaan.</p>
                 )}
@@ -295,7 +347,7 @@ const CandidateDetailPage: React.FC = () => {
                         <SectionCard title="Dokumen" icon={<DocumentTextIcon className="h-5 w-5 text-gray-500" />}>
                             <div className="space-y-3">
                                 {(candidate.documents ?? []).length > 0 ? (
-                                    (candidate.documents ?? []).map(doc => <DocumentCard key={doc.name} doc={doc}/>)
+                                    (candidate.documents ?? []).map(doc => <DocumentCard key={doc.file_name} doc={doc}/>)
                                 ) : (
                                     <p className="text-sm text-gray-500">Tidak ada dokumen yang diunggah.</p>
                                 )}

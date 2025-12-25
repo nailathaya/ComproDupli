@@ -11,6 +11,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Profile, WorkExperience, Education, Skill, Document } from '../types';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, XCircleIcon } from '../components/icons';
 import { getCandidateById } from '../services/api';
+import profilePicture from '../components/profile-kandidat.webp';
 import {
   updateCandidate,
   updateSalary,
@@ -145,7 +146,7 @@ const ProfilUtamaCard: React.FC<{ profile: Profile; setProfile: React.Dispatch<R
             <div className="flex justify-between items-start flex-wrap gap-6">
                 <div className="flex items-start gap-6 flex-grow min-w-[280px]">
                     <div className="relative flex-shrink-0">
-                        <img className="h-24 w-24 rounded-full object-cover" src={profileImage} alt={formData.name} />
+                        <img className="h-24 w-24 rounded-full object-cover" src={profilePicture}/>
                         {isEditing && (
                             <>
                                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} className="hidden" />
@@ -546,13 +547,13 @@ const ConfirmationDialog: React.FC<{
 );
 
 
-const DocumentUploadSection: React.FC<{ documents: Document[]; onUpdate: (docs: Document[]) => void }> = ({ documents = [], onUpdate }) => {
-    // --- Common State & Memos ---
-    const [error, setError] = useState('');
-    const resume = useMemo(() => documents.find(doc => doc.type === 'resume'), [documents]);
-    const certificates = useMemo(() => documents.filter(doc => doc.type === 'certificate'), [documents]);
+// const DocumentUploadSection: React.FC<{ documents: Document[]; onUpdate: (docs: Document[]) => void }> = ({ documents = [], onUpdate }) => {
+//     // --- Common State & Memos ---
+//     const [error, setError] = useState('');
+//     const resume = useMemo(() => documents.find(doc => doc.type === 'resume'), [documents]);
+//     const certificates = useMemo(() => documents.filter(doc => doc.type === 'certificate'), [documents]);
     
-    // --- Reusable Uploader UI ---
+//     // --- Reusable Uploader UI ---
     const UploaderUI: React.FC<{
         stagedFiles: File[];
         onFileRemove: (fileName: string) => void;
@@ -597,165 +598,165 @@ const DocumentUploadSection: React.FC<{ documents: Document[]; onUpdate: (docs: 
         );
     };
 
-    // --- Resume State & Logic ---
-    const [isAddingResume, setIsAddingResume] = useState(false);
-    const [stagedResume, setStagedResume] = useState<File | null>(null);
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+//     // --- Resume State & Logic ---
+//     const [isAddingResume, setIsAddingResume] = useState(false);
+//     const [stagedResume, setStagedResume] = useState<File | null>(null);
+//     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-    const formatBytes = (bytes?: number, decimals = 2) => {
-        if (!bytes || bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    };
+//     const formatBytes = (bytes?: number, decimals = 2) => {
+//         if (!bytes || bytes === 0) return '0 Bytes';
+//         const k = 1024;
+//         const dm = decimals < 0 ? 0 : decimals;
+//         const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+//         const i = Math.floor(Math.log(bytes) / Math.log(k));
+//         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+//     };
 
-    const handleAddStagedResume = (files: File[]) => {
-        const file = files[0];
-        if (!file) return;
+//     const handleAddStagedResume = (files: File[]) => {
+//         const file = files[0];
+//         if (!file) return;
 
-        setError('');
-        const allowedFormats = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-        if (!allowedFormats.includes(file.type)) {
-            setError("Format file tidak didukung. Gunakan PDF, DOC, atau DOCX.");
-            return;
-        }
+//         setError('');
+//         const allowedFormats = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+//         if (!allowedFormats.includes(file.type)) {
+//             setError("Format file tidak didukung. Gunakan PDF, DOC, atau DOCX.");
+//             return;
+//         }
 
-        const maxSize = 5 * 1024 * 1024; // 5 MB
-        if (file.size > maxSize) {
-            setError("Ukuran file melebihi batas 5 MB.");
-            return;
-        }
-        setStagedResume(file);
-    };
+//         const maxSize = 5 * 1024 * 1024; // 5 MB
+//         if (file.size > maxSize) {
+//             setError("Ukuran file melebihi batas 5 MB.");
+//             return;
+//         }
+//         setStagedResume(file);
+//     };
     
-    const handleSaveResume = () => {
-        if (!stagedResume) return;
-        const newResume: Document = {
-            id: `resume-${Date.now()}`,
-            type: 'resume',
-            name: stagedResume.name,
-            fileSize: stagedResume.size,
-            uploadedAt: new Date().toISOString(),
-            url: URL.createObjectURL(stagedResume)
-        };
-        onUpdate([...certificates, newResume]);
-        setStagedResume(null);
-        setIsAddingResume(false);
-    };
+//     const handleSaveResume = () => {
+//         if (!stagedResume) return;
+//         const newResume: Document = {
+//             id: `resume-${Date.now()}`,
+//             type: 'resume',
+//             name: stagedResume.name,
+//             fileSize: stagedResume.size,
+//             uploadedAt: new Date().toISOString(),
+//             url: URL.createObjectURL(stagedResume)
+//         };
+//         onUpdate([...certificates, newResume]);
+//         setStagedResume(null);
+//         setIsAddingResume(false);
+//     };
     
-    const handleConfirmDelete = () => {
-        onUpdate(certificates);
-        setShowDeleteConfirm(false);
-    };
+//     const handleConfirmDelete = () => {
+//         onUpdate(certificates);
+//         setShowDeleteConfirm(false);
+//     };
 
-    // --- Certificate State & Logic ---
-    const [isAddingCerts, setIsAddingCerts] = useState(false);
-    const [stagedCerts, setStagedCerts] = useState<File[]>([]);
+//     // --- Certificate State & Logic ---
+//     const [isAddingCerts, setIsAddingCerts] = useState(false);
+//     const [stagedCerts, setStagedCerts] = useState<File[]>([]);
     
-    const handleSaveCerts = () => {
-        if (stagedCerts.length === 0) return;
-        const newCertDocs: Document[] = stagedCerts.map((file, index) => ({
-            id: `cert-${Date.now()}-${index}`,
-            type: 'certificate', name: file.name, url: '#', uploadedAt: new Date().toISOString(),
-        }));
-        onUpdate(resume ? [resume, ...certificates, ...newCertDocs] : [...certificates, ...newCertDocs]);
-        setStagedCerts([]);
-        setIsAddingCerts(false);
-    };
+//     const handleSaveCerts = () => {
+//         if (stagedCerts.length === 0) return;
+//         const newCertDocs: Document[] = stagedCerts.map((file, index) => ({
+//             id: `cert-${Date.now()}-${index}`,
+//             type: 'certificate', name: file.name, url: '#', uploadedAt: new Date().toISOString(),
+//         }));
+//         onUpdate(resume ? [resume, ...certificates, ...newCertDocs] : [...certificates, ...newCertDocs]);
+//         setStagedCerts([]);
+//         setIsAddingCerts(false);
+//     };
 
-    const handleDeleteCertificate = (docToDelete: Document) => {
-        if (window.confirm(`Anda yakin ingin menghapus "${docToDelete.name}"?`)) {
-             onUpdate(documents.filter(doc => doc.id !== docToDelete.id));
-        }
-    };
+//     const handleDeleteCertificate = (docToDelete: Document) => {
+//         if (window.confirm(`Anda yakin ingin menghapus "${docToDelete.name}"?`)) {
+//              onUpdate(documents.filter(doc => doc.id !== docToDelete.id));
+//         }
+//     };
     
-    return (
-        <SectionCard title="Dokumen Unggahan">
-            {showDeleteConfirm && (
-                <ConfirmationDialog
-                    title="Hapus Resume?"
-                    message="Resume yang dihapus tidak dapat dikembalikan."
-                    onConfirm={handleConfirmDelete}
-                    onCancel={() => setShowDeleteConfirm(false)}
-                />
-            )}
-            <div className="space-y-6">
-                {/* --- New Resume Section --- */}
-                <div>
-                    <h4 className="font-semibold text-gray-700 mb-2">Resume</h4>
-                    {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
+//     return (
+//         <SectionCard title="Dokumen Unggahan">
+//             {showDeleteConfirm && (
+//                 <ConfirmationDialog
+//                     title="Hapus Resume?"
+//                     message="Resume yang dihapus tidak dapat dikembalikan."
+//                     onConfirm={handleConfirmDelete}
+//                     onCancel={() => setShowDeleteConfirm(false)}
+//                 />
+//             )}
+//             <div className="space-y-6">
+//                 {/* --- New Resume Section --- */}
+//                 <div>
+//                     <h4 className="font-semibold text-gray-700 mb-2">Resume</h4>
+//                     {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
                     
-                    {resume ? (
-                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                            <p className="font-bold text-gray-800">Resume Anda</p>
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2">
-                                <p className="text-sm text-gray-600 truncate">
-                                    <span className="font-medium text-black">{resume.name}</span> – {formatBytes(resume.fileSize)} – Diunggah pada {formatDate(resume.uploadedAt)}
-                                </p>
-                                <div className="flex items-center gap-3 flex-shrink-0">
-                                    <a href={resume.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-600 hover:underline">Lihat</a>
-                                    <button onClick={() => setShowDeleteConfirm(true)} className="text-sm font-semibold text-red-600 hover:underline">Hapus</button>
-                                </div>
-                            </div>
-                             <p className="text-xs text-gray-500 mt-2">Anda hanya dapat mengupload satu resume.</p>
-                        </div>
-                    ) : isAddingResume ? (
-                        <UploaderUI
-                            stagedFiles={stagedResume ? [stagedResume] : []}
-                            onFileRemove={() => setStagedResume(null)}
-                            onFilesAdd={handleAddStagedResume}
-                            onSave={handleSaveResume}
-                            onCancel={() => { setIsAddingResume(false); setError(''); setStagedResume(null); }}
-                            accept=".pdf,.doc,.docx"
-                            multiple={false}
-                        />
-                    ) : (
-                        <button onClick={() => { setIsAddingResume(true); setError(''); }} className="w-full mt-3 border-2 border-dashed border-gray-300 rounded-lg py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center">
-                           <PlusIcon className="h-5 w-5 mr-2" />
-                           Add Submission
-                       </button>
-                    )}
-                </div>
+//                     {resume ? (
+//                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+//                             <p className="font-bold text-gray-800">Resume Anda</p>
+//                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2">
+//                                 <p className="text-sm text-gray-600 truncate">
+//                                     <span className="font-medium text-black">{resume.name}</span> – {formatBytes(resume.fileSize)} – Diunggah pada {formatDate(resume.uploadedAt)}
+//                                 </p>
+//                                 <div className="flex items-center gap-3 flex-shrink-0">
+//                                     <a href={resume.url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-600 hover:underline">Lihat</a>
+//                                     <button onClick={() => setShowDeleteConfirm(true)} className="text-sm font-semibold text-red-600 hover:underline">Hapus</button>
+//                                 </div>
+//                             </div>
+//                              <p className="text-xs text-gray-500 mt-2">Anda hanya dapat mengupload satu resume.</p>
+//                         </div>
+//                     ) : isAddingResume ? (
+//                         <UploaderUI
+//                             stagedFiles={stagedResume ? [stagedResume] : []}
+//                             onFileRemove={() => setStagedResume(null)}
+//                             onFilesAdd={handleAddStagedResume}
+//                             onSave={handleSaveResume}
+//                             onCancel={() => { setIsAddingResume(false); setError(''); setStagedResume(null); }}
+//                             accept=".pdf,.doc,.docx"
+//                             multiple={false}
+//                         />
+//                     ) : (
+//                         <button onClick={() => { setIsAddingResume(true); setError(''); }} className="w-full mt-3 border-2 border-dashed border-gray-300 rounded-lg py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center">
+//                            <PlusIcon className="h-5 w-5 mr-2" />
+//                            Add Submission
+//                        </button>
+//                     )}
+//                 </div>
 
-                {/* --- Certificate Section (Preserved) --- */}
-                <div>
-                    <h4 className="font-semibold text-gray-700 mb-2">Sertifikat</h4>
-                     <div className="space-y-2">
-                        {certificates.map(cert => (
-                           <div key={cert.id} className="flex items-center justify-between p-3 bg-gray-50 border rounded-lg">
-                               <div className="flex items-center gap-3 min-w-0">
-                                   <FileIcon className="h-6 w-6 text-gray-500 flex-shrink-0" />
-                                   <p className="text-sm font-medium text-gray-800 truncate" title={cert.name}>{cert.name}</p>
-                               </div>
-                               <button onClick={() => handleDeleteCertificate(cert)} className="text-gray-400 hover:text-red-600 flex-shrink-0 ml-2">
-                                   <TrashIcon className="h-5 w-5" />
-                               </button>
-                           </div>
-                        ))}
-                    </div>
-                     {isAddingCerts ? (
-                        <UploaderUI
-                            stagedFiles={stagedCerts}
-                            onFileRemove={(name) => setStagedCerts(f => f.filter(file => file.name !== name))}
-                            onFilesAdd={(files) => setStagedCerts(f => [...f, ...files])}
-                            onSave={handleSaveCerts}
-                            onCancel={() => setIsAddingCerts(false)}
-                            accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
-                            multiple={true}
-                        />
-                    ) : (
-                       <button onClick={() => setIsAddingCerts(true)} className="w-full mt-3 border-2 border-dashed border-gray-300 rounded-lg py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center">
-                           <PlusIcon className="h-5 w-5 mr-2" />
-                           Add Submission
-                       </button>
-                    )}
-                </div>
-            </div>
-        </SectionCard>
-    );
-};
+//                 {/* --- Certificate Section (Preserved) --- */}
+//                 <div>
+//                     <h4 className="font-semibold text-gray-700 mb-2">Sertifikat</h4>
+//                      <div className="space-y-2">
+//                         {certificates.map(cert => (
+//                            <div key={cert.id} className="flex items-center justify-between p-3 bg-gray-50 border rounded-lg">
+//                                <div className="flex items-center gap-3 min-w-0">
+//                                    <FileIcon className="h-6 w-6 text-gray-500 flex-shrink-0" />
+//                                    <p className="text-sm font-medium text-gray-800 truncate" title={cert.name}>{cert.name}</p>
+//                                </div>
+//                                <button onClick={() => handleDeleteCertificate(cert)} className="text-gray-400 hover:text-red-600 flex-shrink-0 ml-2">
+//                                    <TrashIcon className="h-5 w-5" />
+//                                </button>
+//                            </div>
+//                         ))}
+//                     </div>
+//                      {isAddingCerts ? (
+//                         <UploaderUI
+//                             stagedFiles={stagedCerts}
+//                             onFileRemove={(name) => setStagedCerts(f => f.filter(file => file.name !== name))}
+//                             onFilesAdd={(files) => setStagedCerts(f => [...f, ...files])}
+//                             onSave={handleSaveCerts}
+//                             onCancel={() => setIsAddingCerts(false)}
+//                             accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+//                             multiple={true}
+//                         />
+//                     ) : (
+//                        <button onClick={() => setIsAddingCerts(true)} className="w-full mt-3 border-2 border-dashed border-gray-300 rounded-lg py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center">
+//                            <PlusIcon className="h-5 w-5 mr-2" />
+//                            Add Submission
+//                        </button>
+//                     )}
+//                 </div>
+//             </div>
+//         </SectionCard>
+//     );
+// };
 
 
 // const DashboardPage: React.FC = () => {
@@ -828,6 +829,228 @@ const DocumentUploadSection: React.FC<{ documents: Document[]; onUpdate: (docs: 
 //     );
 // };
 // export default DashboardPage;
+
+const DocumentUploadSection: React.FC<{
+  documents: Document[];
+  onUpdate: (docs: Document[]) => void;
+}> = ({ documents = [], onUpdate }) => {
+
+  // =========================
+  // MEMO
+  // =========================
+  const resume = useMemo(
+    () => documents.find(d => d.type === 'resume'),
+    [documents]
+  );
+
+  const certificates = useMemo(
+    () => documents.filter(d => d.type === 'certificate'),
+    [documents]
+  );
+
+  // =========================
+  // RESUME STATE
+  // =========================
+  const [isAddingResume, setIsAddingResume] = useState(false);
+  const [stagedResume, setStagedResume] = useState<File | null>(null);
+  const [error, setError] = useState('');
+
+  // =========================
+  // CERTIFICATE STATE (WITH DESCRIPTION)
+  // =========================
+  type StagedCertificate = {
+    file: File;
+    description: string;
+  };
+
+  const [isAddingCerts, setIsAddingCerts] = useState(false);
+  const [stagedCerts, setStagedCerts] = useState<StagedCertificate[]>([]);
+
+  // =========================
+  // RESUME HANDLER
+  // =========================
+  const handleAddResume = (files: File[]) => {
+    const file = files[0];
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError('Ukuran file maksimal 5MB');
+      return;
+    }
+
+    setError('');
+    setStagedResume(file);
+  };
+
+  const handleSaveResume = () => {
+    if (!stagedResume) return;
+
+    const newResume: Document = {
+      id: `resume-${Date.now()}`,
+      type: 'resume',
+      file_name: stagedResume.name,
+      fileSize: stagedResume.size,
+      uploadedAt: new Date().toISOString(),
+      file_url: URL.createObjectURL(stagedResume),
+    };
+
+    onUpdate([...certificates, newResume]);
+    setStagedResume(null);
+    setIsAddingResume(false);
+  };
+
+  // =========================
+  // CERTIFICATE HANDLER
+  // =========================
+  const handleSaveCerts = () => {
+    if (stagedCerts.length === 0) return;
+
+    const newCertDocs: Document[] = stagedCerts.map(
+      ({ file, description }, idx) => ({
+        id: `cert-${Date.now()}-${idx}`,
+        type: 'certificate',
+        file_name: file.name,
+        description,
+        uploaded_at: new Date().toISOString(),
+        file_url: '#',
+      })
+    );
+
+    onUpdate(
+      resume
+        ? [resume, ...certificates, ...newCertDocs]
+        : [...certificates, ...newCertDocs]
+    );
+
+    setStagedCerts([]);
+    setIsAddingCerts(false);
+  };
+
+  // =========================
+  // RENDER
+  // =========================
+  return (
+    <SectionCard title="Dokumen Unggahan">
+      <div className="space-y-6">
+
+        {/* ================= RESUME ================= */}
+        <div>
+          <h4 className="font-semibold text-gray-700 mb-2">Resume</h4>
+
+          {resume ? (
+            <div className="p-3 bg-gray-50 border rounded-lg">
+              <p className="font-medium text-gray-800">{resume.file_name}</p>
+            </div>
+          ) : isAddingResume ? (
+            <UploaderUI
+              stagedFiles={stagedResume ? [stagedResume] : []}
+              onFileRemove={() => setStagedResume(null)}
+              onFilesAdd={handleAddResume}
+              onSave={handleSaveResume}
+              onCancel={() => {
+                setIsAddingResume(false);
+                setStagedResume(null);
+              }}
+              accept=".pdf,.doc,.docx"
+              multiple={false}
+            />
+          ) : (
+            <button
+              onClick={() => setIsAddingResume(true)}
+              className="w-full border-2 border-dashed rounded-lg py-2 text-gray-600"
+            >
+              + Add Resume
+            </button>
+          )}
+
+          {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+        </div>
+
+        {/* ================= CERTIFICATE ================= */}
+        <div>
+          <h4 className="font-semibold text-gray-700 mb-2">Sertifikat</h4>
+
+          {/* Existing certificates */}
+          {certificates.map(cert => (
+            <div
+              key={cert.id}
+              className="p-3 bg-gray-50 border rounded-lg mb-2"
+            >
+              <p className="font-medium text-gray-800">{cert.file_name}</p>
+              {cert.description && (
+                <p className="text-sm text-gray-600">{cert.description}</p>
+              )}
+            </div>
+          ))}
+
+          {/* Upload cert */}
+          {isAddingCerts ? (
+            <div className="space-y-3">
+              <UploaderUI
+                stagedFiles={stagedCerts.map(c => c.file)}
+                onFileRemove={(name) =>
+                  setStagedCerts(prev =>
+                    prev.filter(c => c.file.name !== name)
+                  )
+                }
+                onFilesAdd={(files) =>
+                  setStagedCerts(prev => [
+                    ...prev,
+                    ...files.map(file => ({
+                      file,
+                      description: '',
+                    })),
+                  ])
+                }
+                onSave={handleSaveCerts}
+                onCancel={() => {
+                  setIsAddingCerts(false);
+                  setStagedCerts([]);
+                }}
+                accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+                multiple
+              />
+
+              {/* INPUT DESKRIPSI */}
+              {stagedCerts.map((item, idx) => (
+                <div
+                  key={item.file.name}
+                  className="p-3 bg-white border rounded-lg"
+                >
+                  <p className="text-sm font-medium">{item.file.name}</p>
+                  <input
+                    type="text"
+                    placeholder="Deskripsi sertifikat"
+                    value={item.description}
+                    onChange={(e) =>
+                      setStagedCerts(prev =>
+                        prev.map((c, i) =>
+                          i === idx
+                            ? { ...c, description: e.target.value }
+                            : c
+                        )
+                      )
+                    }
+                    className={`${formInputClass} mt-2`}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsAddingCerts(true)}
+              className="w-full border-2 border-dashed rounded-lg py-2 text-gray-600"
+            >
+              + Add Certificate
+            </button>
+          )}
+        </div>
+      </div>
+    </SectionCard>
+  );
+};
+
 
 const DashboardPage: React.FC = () => {
     const { user } = useAuthStore();

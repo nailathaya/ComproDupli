@@ -57,17 +57,24 @@ export const useJobStore = create<JobState>((set, get) => ({
     const mappedJobs: Job[] = data.map((j: any) => ({
       id: j.id,
       title: j.title,
-      // company: j.department ?? 'Perusahaan',
       location: j.location,
       employmentType: j.employment_type,
-      jobLevel: 'Entry Level', // sementara (bisa derive dari experience)
       jobFunction: j.department,
       education: j.min_education,
-      salary: {
-        min: 0, // backend belum ada
-        max: 0,
-      },
-      postedDate: j.created_at,
+
+      jobLevel:
+        j.min_experience_years === 0
+          ? 'Fresh Graduate'
+          : j.min_experience_years <= 2
+          ? 'Junior'
+          : 'Senior',
+
+      skills: j.skills ?? [],
+      certifications: j.certifications ?? [],
+
+      closingDate: j.closing_date,
+      openPositions: j.required_candidates,
+
       logoUrl: '/logo-default.png',
       status: j.status === 'published' ? 'Published' : 'Closed',
     }));

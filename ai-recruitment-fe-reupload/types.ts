@@ -41,11 +41,18 @@ export interface RecruitmentStage {
   status: 'Lolos' | 'Tidak Lolos' | 'Belum';
 }
 
+// export interface ApplicationHistory {
+//   id: number;
+//   job_id: number;
+//   applied_at: string;
+//   stages: RecruitmentStage[];
+// }
+
 export interface ApplicationHistory {
   id: number;
   job_id: number;
-  applied_at: string;
   stages: RecruitmentStage[];
+  aiScreening?: AIScreeningRecommendation; // 🔥 PINDAH KE SINI
 }
 
 
@@ -79,14 +86,30 @@ export interface CandidateDetail extends Candidate {
   activity?: Activity[];
 }
 
+export interface JobDetail {
+  description: string;
+  min_education: string;
+  min_experience_years: number;
+  department: string;
+  location: string;
+  required_candidates: number;
+  closing_date?: string;
+
+  skills: string[];
+  certifications: string[];
+}
+
+
+
 
 export interface Document {
     id: string;
     type: 'resume' | 'certificate';
-    name: string;
-    url: string;
+    file_name: string;
+    file_url: string;
     uploadedAt: string;
     fileSize?: number; // in bytes
+    description?: string;
 }
 
 export interface Activity {

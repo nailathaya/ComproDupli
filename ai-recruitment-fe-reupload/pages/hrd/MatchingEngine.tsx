@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHrdStore } from '../../store/useHrdStore';
 import { MatchResult } from '../../types';
+import profilePicture from '../../components/profile-kandidat.webp';
 
 const MatchingEngine: React.FC = () => {
     const {
@@ -53,7 +54,7 @@ const MatchingEngine: React.FC = () => {
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
                                     <div className="flex-shrink-0 h-10 w-10">
-                                        <img className="h-10 w-10 rounded-full object-cover" src={candidate.user.avatarUrl} alt={candidate.user.name} />
+                                        <img className="h-10 w-10 rounded-full object-cover" src={profilePicture} alt={candidate.user.name} />
                                     </div>
                                     <div className="ml-4">
                                         <div className="text-sm font-medium text-black">{candidate.user.name}</div>

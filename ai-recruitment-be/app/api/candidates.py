@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session,joinedload
 from typing import List
+from fastapi import Request
 
 from app.core.database import get_db
 from app.models.user import User
@@ -18,7 +19,6 @@ from app.schemas.request import (
     DocumentRequest,
 )
 from app.models.application import Application
-from app.schemas.response import CandidateListItemResponse
 from app.core.database import get_db
 from app.api.deps import get_current_user
 
@@ -121,19 +121,22 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
             {
                 "id": d.id,
                 "type": d.type,
-                "name": d.name,
-                "url": d.url,
-                "uploadedAt": d.created_at,
-                "fileSize": d.file_size,
+                "file_name": d.file_name,
+                "file_url": d.file_url,
+                "uploaded_at": d.uploaded_at,
+                "description": d.description,
             }
             for d in user.documents
         ],
-
         "activity": [],  # optional
         "applicationHistory": applications,
     }
 
-
+@router.put("/{candidate_id}/documents-debug")
+async def save_documents_debug(candidate_id: int, request: Request):
+    body = await request.json()
+    print("RAW BODY:", body)
+    return body
 
 @router.put("/{candidate_id}")
 def update_candidate(
@@ -244,18 +247,25 @@ def save_salary(
 # DOCUMENT
 # ======================
 @router.put("/{candidate_id}/documents")
-def save_documents(candidate_id: int, data: list[DocumentRequest], db: Session = Depends(get_db)):
+def save_documents(
+    candidate_id: int,
+    data: list[DocumentRequest],
+    db: Session = Depends(get_db),
+):
     db.query(Document).filter(Document.user_id == candidate_id).delete()
+
     for d in data:
         db.add(Document(
             user_id=candidate_id,
             type=d.type,
-            name=d.name,
-            url=d.url,
-            file_size=d.fileSize
+            file_name=d.file_name,
+            file_url=d.file_url,
+            description=d.description,
         ))
+
     db.commit()
     return {"message": "Documents saved"}
+
 
 @router.get("/")
 def get_all_candidates(
@@ -313,3 +323,55 @@ def get_all_candidates(
         })
 
     return result
+
+# @router.get("/management", response_model=List[CandidateManagementResponse])
+# def get_candidates(db: Session = Depends(get_db)):
+#     applications = (
+#         db.query(Application)
+#         .options(
+#             joinedload(Application.user),
+#             joinedload(Application.job),
+#             joinedload(Application.stages),
+#             joinedload(Application.ai_result),  # 🔥 TAMBAHAN
+#         )
+#         .all()
+#     )
+
+#     result = {}
+
+#     for app in applications:
+#         user = app.user
+
+#         if user.id not in result:
+#             result[user.id] = {
+#                 "id": user.id,
+#                 "user": {
+#                     "name": user.full_name,
+#                     "email": user.email,
+#                 },
+#                 "positionApplied": app.job.title if app.job else "",
+#                 "applicationHistory": [],
+#             }
+
+#         result[user.id]["applicationHistory"].append({
+#             "id": app.id,
+#             "job_id": app.job_id,
+#             "position": app.job.title if app.job else "",
+#             "stages": [
+#                 {
+#                     "name": stage.name,
+#                     "status": stage.status,
+#                 }
+#                 for stage in app.stages
+#             ],
+#             "aiScreening": (
+#                 {
+#                     "status": app.ai_result.recommendation_status,
+#                     "confidence": app.ai_result.confidence,
+#                     "reason": app.ai_result.reason,
+#                 }
+#                 if app.ai_result else None
+#             ),
+#         })
+
+#     return list(result.values())

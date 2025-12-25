@@ -16,7 +16,6 @@ router = APIRouter(
     tags=["Job Postings"]
 )
 
-
 # =========================
 # GET JOB DETAIL (PUBLIC)
 # =========================
@@ -25,11 +24,50 @@ router = APIRouter(
 def get_public_jobs(db: Session = Depends(get_db)):
     jobs = (
         db.query(JobPosting)
+        .options(
+            joinedload(JobPosting.skills),
+            joinedload(JobPosting.certifications),
+        )
         .filter(JobPosting.status == "published")
         .order_by(JobPosting.created_at.desc())
         .all()
     )
     return jobs
+
+@router.get("/{job_id}")
+def get_job_detail(job_id: int, db: Session = Depends(get_db)):
+    job = (
+        db.query(JobPosting)
+        .options(
+            joinedload(JobPosting.skills),
+            joinedload(JobPosting.certifications),
+        )
+        .filter(JobPosting.id == job_id)
+        .first()
+    )
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    return {
+        "description": job.description,
+        "min_education": job.min_education,
+        "min_experience_years": job.min_experience_years,
+        "department": job.department,
+        "location": job.location,
+        "required_candidates": job.required_candidates,
+        "closing_date": job.closing_date,
+
+        "skills": [
+            s.skill_name
+            for s in job.skills
+        ],
+
+        "certifications": [
+            c.certification_name
+            for c in job.certifications
+        ],
+    }
 
 @router.get("/public/{job_id}", response_model=JobPostingResponse)
 def get_public_job_by_id(

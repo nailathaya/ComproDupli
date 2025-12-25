@@ -5,6 +5,7 @@ import { useUiStore } from '../../store/useUiStore';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import HrdNotificationBell from '../hrd/NotificationBell';
 import CandidateNotificationBell from '../candidate/NotificationBell';
+import profilePicture from '../profile-kandidat.webp';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuthStore();
@@ -74,7 +75,7 @@ const Header: React.FC = () => {
                         aria-haspopup="true"
                     >
                         <span className="mr-2">{user?.name}</span>
-                        <img className="h-8 w-8 rounded-full object-cover" src={user?.avatarUrl} alt="User avatar" />
+                        <img className="h-8 w-8 rounded-full object-cover" src={profilePicture} alt="User avatar" />
                     </button>
                     <div className={`${isProfileOpen ? 'block' : 'hidden'} absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5`}>
                         {isHrd && (

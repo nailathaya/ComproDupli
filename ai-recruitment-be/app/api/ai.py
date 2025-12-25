@@ -127,6 +127,7 @@ from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.application import Application
 from app.schemas.request import AIMatchRequest
+from app.models.ai_screening_result import AIScreeningResult
 
 from app.services.embedding import process_candidates_to_documents,generate_vector_store,update_candidate_embedding
 from app.services.query import find_best_candidates_raw, score_candidates_with_llm
@@ -147,9 +148,9 @@ from app.services.query import score_candidates_with_llm
 def map_llm_recommendation(rec: str):
     rec = rec.lower().strip()
 
-    if "lolos" in rec:
+    if "lolos" == rec:
         return "PASS"
-    elif "pertimbangkan" in rec or "review" in rec:
+    elif "pertimbangkan" == rec or "review" == rec:
         return "REVIEW"
     else:
         return "REJECT"
@@ -170,6 +171,7 @@ def ai_match(
             joinedload(Application.user).joinedload(User.experiences),
             joinedload(Application.user).joinedload(User.educations),
             joinedload(Application.user).joinedload(User.salary),
+            joinedload(Application.user).joinedload(User.documents),
         )
         .filter(Application.job_id == payload.job_id)
         .all()
@@ -185,6 +187,10 @@ def ai_match(
     candidates_payload = []
     for app in applications:
         user = app.user
+        certificates = [
+            d for d in user.documents
+            if d.type == "certificate"
+        ]
         candidates_payload.append({
             "id": user.id,
             "user": {
@@ -204,6 +210,13 @@ def ai_match(
                     "fieldOfStudy": edu.field_of_study,
                 } for edu in user.educations
             ],
+            "certifications": [
+                {
+                    "name": cert.file_name,
+                    "description": cert.description or ""
+                }
+                for cert in certificates
+            ]
         })
 
     # 🔥 SEMANTIC MATCHING TANPA CHROMA
@@ -222,6 +235,41 @@ def ai_match(
         key=lambda x: x["skor"],
         reverse=True
     )
+
+    for r in sorted_results:
+        application = next(
+            (app for app in applications if app.user.id == r["id"]),
+            None
+        )
+
+        if not application:
+            continue
+
+        existing = (
+            db.query(AIScreeningResult)
+            .filter(AIScreeningResult.application_id == application.id)
+            .first()
+        )
+
+        if existing:
+            existing.fit_score = r["skor"]
+            existing.summary = r["analisis_singkat"]
+            existing.recommendation_status = map_llm_recommendation(r["rekomendasi"])
+            existing.confidence = r["skor"] / 100
+            existing.reason = r["rekomendasi"]
+        else:
+            db.add(
+                AIScreeningResult(
+                    application_id=application.id,
+                    fit_score=r["skor"],
+                    summary=r["analisis_singkat"],
+                    recommendation_status=map_llm_recommendation(r["rekomendasi"]),
+                    confidence=r["skor"] / 100,
+                    reason=r["rekomendasi"],
+                )
+            )
+
+    db.commit()
 
     return [
     {
