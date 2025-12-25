@@ -58,13 +58,18 @@ class ApplicationStageResponse(BaseModel):
     name: str
     status: str
 
+class AIScreeningResponse(BaseModel):
+    status: str
+    confidence: Optional[float]
+    reason: Optional[str]
 
 class ApplicationHistoryResponse(BaseModel):
-    id: str
+    id: int
+    job_id: int
     position: str
-    applied_date: str
-    status: str
     stages: List[ApplicationStageResponse]
+    aiScreening: Optional[AIScreeningResponse]
+
 
 
 class CandidateResponse(BaseModel):
@@ -145,3 +150,13 @@ class AIMatchResponse(BaseModel):
     summary: str
     matchingAspects: List[str]
     aiReason: str
+
+class CandidateUserResponse(BaseModel):
+    name: str
+    email: str
+
+class CandidateManagementResponse(BaseModel):
+    id: int
+    user: CandidateUserResponse
+    positionApplied: Optional[str]
+    applicationHistory: List[ApplicationHistoryResponse]

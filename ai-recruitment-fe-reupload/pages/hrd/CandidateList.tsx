@@ -21,9 +21,6 @@ const isStageUnlocked = (
   return prevStage?.status === 'Lolos';
 };
 
-
-
-
 const getAIBulletColor = (status: AIScreeningStatus) => {
   switch (status) {
     case 'PASS':

@@ -18,12 +18,68 @@ from app.schemas.request import (
     SalaryRequest,
     DocumentRequest,
 )
+
+from app.schemas.response import CandidateManagementResponse
 from app.models.application import Application
 from app.core.database import get_db
 from app.api.deps import get_current_user
 
 
 router = APIRouter(prefix="/candidates", tags=["Candidates"])
+
+
+@router.get("/management", response_model=List[CandidateManagementResponse])
+def get_candidates(db: Session = Depends(get_db)):
+    applications = (
+        db.query(Application)
+        .options(
+            joinedload(Application.user),
+            joinedload(Application.job),
+            joinedload(Application.stages),
+            joinedload(Application.ai_result),  # 🔥 TAMBAHAN
+        )
+        .all()
+    )
+
+    result = {}
+
+    for app in applications:
+        user = app.user
+
+        if user.id not in result:
+            result[user.id] = {
+                "id": user.id,
+                "user": {
+                    "name": user.full_name,
+                    "email": user.email,
+                },
+                "positionApplied": app.job.title if app.job else "",
+                "applicationHistory": [],
+            }
+
+        result[user.id]["applicationHistory"].append({
+            "id": app.id,
+            "job_id": app.job_id,
+            "position": app.job.title if app.job else "",
+            "stages": [
+                {
+                    "name": stage.name,
+                    "status": stage.status,
+                }
+                for stage in app.stages
+            ],
+            "aiScreening": (
+                {
+                    "status": app.ai_result.recommendation_status,
+                    "confidence": app.ai_result.confidence,
+                    "reason": app.ai_result.reason,
+                }
+                if app.ai_result else None
+            ),
+        })
+
+    return list(result.values())
+
 
 @router.get("/{candidate_id}")
 def get_candidate(candidate_id: int, db: Session = Depends(get_db)):
@@ -323,55 +379,3 @@ def get_all_candidates(
         })
 
     return result
-
-# @router.get("/management", response_model=List[CandidateManagementResponse])
-# def get_candidates(db: Session = Depends(get_db)):
-#     applications = (
-#         db.query(Application)
-#         .options(
-#             joinedload(Application.user),
-#             joinedload(Application.job),
-#             joinedload(Application.stages),
-#             joinedload(Application.ai_result),  # 🔥 TAMBAHAN
-#         )
-#         .all()
-#     )
-
-#     result = {}
-
-#     for app in applications:
-#         user = app.user
-
-#         if user.id not in result:
-#             result[user.id] = {
-#                 "id": user.id,
-#                 "user": {
-#                     "name": user.full_name,
-#                     "email": user.email,
-#                 },
-#                 "positionApplied": app.job.title if app.job else "",
-#                 "applicationHistory": [],
-#             }
-
-#         result[user.id]["applicationHistory"].append({
-#             "id": app.id,
-#             "job_id": app.job_id,
-#             "position": app.job.title if app.job else "",
-#             "stages": [
-#                 {
-#                     "name": stage.name,
-#                     "status": stage.status,
-#                 }
-#                 for stage in app.stages
-#             ],
-#             "aiScreening": (
-#                 {
-#                     "status": app.ai_result.recommendation_status,
-#                     "confidence": app.ai_result.confidence,
-#                     "reason": app.ai_result.reason,
-#                 }
-#                 if app.ai_result else None
-#             ),
-#         })
-
-#     return list(result.values())
