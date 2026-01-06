@@ -1,9 +1,9 @@
-# import os
-# import shutil
-# from typing import List, Dict
-# from langchain_core.documents import Document
-# from langchain_chroma import Chroma
-# from langchain_huggingface import HuggingFaceEmbeddings
+import os
+import shutil
+from typing import List, Dict
+from langchain_core.documents import Document
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 # from dotenv import load_dotenv
 # # from data import candidates_dummy
 
