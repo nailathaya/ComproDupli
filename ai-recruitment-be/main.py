@@ -16,7 +16,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://ai-recruitment-app-production-942f.up.railway.app"
+        # "https://ai-recruitment-app-production-942f.up.railway.app"
+        "https://ai-recruitment-app-eight.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
