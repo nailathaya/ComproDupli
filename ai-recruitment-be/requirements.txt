@@ -8,3 +8,6 @@ langchain
 langchain-chroma
 langchain-huggingface
 langchain-openai
+
+python-jose[cryptography]
+passlib[bcrypt]
