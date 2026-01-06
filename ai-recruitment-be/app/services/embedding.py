@@ -1,128 +1,128 @@
-import os
-import shutil
-from typing import List, Dict
-from langchain_core.documents import Document
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from dotenv import load_dotenv
-# from data import candidates_dummy
+# import os
+# import shutil
+# from typing import List, Dict
+# from langchain_core.documents import Document
+# from langchain_chroma import Chroma
+# from langchain_huggingface import HuggingFaceEmbeddings
+# from dotenv import load_dotenv
+# # from data import candidates_dummy
 
-# Load environment variables
-load_dotenv()
+# # Load environment variables
+# load_dotenv()
 
-CHROMA_PATH = os.getenv("CHROMA_PATH", "./chroma_db")
-MODEL_NAME = "intfloat/multilingual-e5-small"
+# CHROMA_PATH = os.getenv("CHROMA_PATH", "./chroma_db")
+# MODEL_NAME = "intfloat/multilingual-e5-small"
 
-def pretty_print_documents(docs: List[Document]):
-    print(f"\n{'='*50}")
-    print(f"📄 Memproses {len(docs)} Dokumen ke Vector Store")
-    print(f"{'='*50}\n")
+# def pretty_print_documents(docs: List[Document]):
+#     print(f"\n{'='*50}")
+#     print(f"📄 Memproses {len(docs)} Dokumen ke Vector Store")
+#     print(f"{'='*50}\n")
 
-    for i, doc in enumerate(docs, 1):
-        print(f"--- [DOKUMEN {i}: {doc.metadata['name']}] ---")
-        print(f"ID: {doc.metadata['candidate_id']}")
-        print(f"Content Preview: {doc.page_content[:150]}...\n")
+#     for i, doc in enumerate(docs, 1):
+#         print(f"--- [DOKUMEN {i}: {doc.metadata['name']}] ---")
+#         print(f"ID: {doc.metadata['candidate_id']}")
+#         print(f"Content Preview: {doc.page_content[:150]}...\n")
 
-def process_candidates_to_documents(candidates: List[Dict]) -> List[Document]:
-    documents = []
+# def process_candidates_to_documents(candidates: List[Dict]) -> List[Document]:
+#     documents = []
     
-    for candidate in candidates:
-        user_info = candidate.get('user', {})
-        name = user_info.get('name', 'N/A')
+#     for candidate in candidates:
+#         user_info = candidate.get('user', {})
+#         name = user_info.get('name', 'N/A')
         
-        # Format Work Experience
-        exp_list = []
-        for exp in candidate.get('workExperience', []):
-            exp_list.append(f"- {exp.get('jobTitle')} di {exp.get('companyName')} ({exp.get('description')})")
-        formatted_experience = "\n".join(exp_list) if exp_list else "Tidak ada."
+#         # Format Work Experience
+#         exp_list = []
+#         for exp in candidate.get('workExperience', []):
+#             exp_list.append(f"- {exp.get('jobTitle')} di {exp.get('companyName')} ({exp.get('description')})")
+#         formatted_experience = "\n".join(exp_list) if exp_list else "Tidak ada."
 
-        # Format Education
-        edu_list = []
-        for edu in candidate.get('education', []):
-            edu_list.append(f"- {edu.get('degree')} {edu.get('fieldOfStudy')} dari {edu.get('institution')}")
-        formatted_education = "\n".join(edu_list) if edu_list else "Tidak ada."
+#         # Format Education
+#         edu_list = []
+#         for edu in candidate.get('education', []):
+#             edu_list.append(f"- {edu.get('degree')} {edu.get('fieldOfStudy')} dari {edu.get('institution')}")
+#         formatted_education = "\n".join(edu_list) if edu_list else "Tidak ada."
 
-        # Format Skills
-        skills_list = [f"{s.get('name')} ({s.get('level')})" for s in candidate.get('skills', [])]
-        formatted_skills = ", ".join(skills_list)
+#         # Format Skills
+#         skills_list = [f"{s.get('name')} ({s.get('level')})" for s in candidate.get('skills', [])]
+#         formatted_skills = ", ".join(skills_list)
 
-        salary = candidate.get('salaryExpectation', {"min": 0, "max": 0})
+#         salary = candidate.get('salaryExpectation', {"min": 0, "max": 0})
 
-        # Struktur konten teks agar kaya akan kata kunci (Semantic Search friendly)
-        text_content = f"""
-Kandidat: {name}
-Posisi: {candidate.get('positionApplied')}
-Lokasi: {user_info.get('location')}
-Keahlian: {formatted_skills}
+#         # Struktur konten teks agar kaya akan kata kunci (Semantic Search friendly)
+#         text_content = f"""
+# Kandidat: {name}
+# Posisi: {candidate.get('positionApplied')}
+# Lokasi: {user_info.get('location')}
+# Keahlian: {formatted_skills}
 
-Pengalaman Kerja:
-{formatted_experience}
+# Pengalaman Kerja:
+# {formatted_experience}
 
-Pendidikan:
-{formatted_education}
+# Pendidikan:
+# {formatted_education}
 
-Ekspektasi Gaji: IDR {salary.get('min'):,} - {salary.get('max'):,}
-        """.strip()
+# Ekspektasi Gaji: IDR {salary.get('min'):,} - {salary.get('max'):,}
+#         """.strip()
         
-        # Metadata untuk filter ChromaDB
-        metadata = {
-            "candidate_id": candidate.get("id"),
-            "name": name,
-            "location": user_info.get('location'),
-            "email": user_info.get("email"),
-            "salary_min": salary.get("min"),
-            "salary_max": salary.get("max")
-        }
+#         # Metadata untuk filter ChromaDB
+#         metadata = {
+#             "candidate_id": candidate.get("id"),
+#             "name": name,
+#             "location": user_info.get('location'),
+#             "email": user_info.get("email"),
+#             "salary_min": salary.get("min"),
+#             "salary_max": salary.get("max")
+#         }
         
-        documents.append(Document(page_content=text_content, metadata=metadata))
+#         documents.append(Document(page_content=text_content, metadata=metadata))
     
-    return documents
+#     return documents
 
-# --- FUNGSI UTAMA ---
+# # --- FUNGSI UTAMA ---
 
-def generate_vector_store(docs, reset=False):
-    # 1. Bersihkan database lama jika ada
-    if reset and os.path.exists(CHROMA_PATH):
-        shutil.rmtree(CHROMA_PATH)
+# def generate_vector_store(docs, reset=False):
+#     # 1. Bersihkan database lama jika ada
+#     if reset and os.path.exists(CHROMA_PATH):
+#         shutil.rmtree(CHROMA_PATH)
   
-    # print(f"🧠 Memuat Embedding Model: {MODEL_NAME}...")
-    embedding_model = HuggingFaceEmbeddings(
-        model_name=MODEL_NAME,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True}
-    )
+#     # print(f"🧠 Memuat Embedding Model: {MODEL_NAME}...")
+#     embedding_model = HuggingFaceEmbeddings(
+#         model_name=MODEL_NAME,
+#         model_kwargs={"device": "cpu"},
+#         encode_kwargs={"normalize_embeddings": True}
+#     )
 
-    # 4. Simpan ke ChromaDB
+#     # 4. Simpan ke ChromaDB
     
-    try:
-        Chroma.from_documents(
-            documents=docs,
-            embedding=embedding_model,
-            persist_directory=CHROMA_PATH
-        )
-        print(f"✅ Berhasil! Database tersimpan di: {CHROMA_PATH}")
-    except Exception as e:
-        print(f"❌ Terjadi kesalahan: {e}")
+#     try:
+#         Chroma.from_documents(
+#             documents=docs,
+#             embedding=embedding_model,
+#             persist_directory=CHROMA_PATH
+#         )
+#         print(f"✅ Berhasil! Database tersimpan di: {CHROMA_PATH}")
+#     except Exception as e:
+#         print(f"❌ Terjadi kesalahan: {e}")
 
-def update_candidate_embedding(candidate: Dict):
-    embedding_model = HuggingFaceEmbeddings(
-        model_name=MODEL_NAME,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True}
-    )
+# def update_candidate_embedding(candidate: Dict):
+#     embedding_model = HuggingFaceEmbeddings(
+#         model_name=MODEL_NAME,
+#         model_kwargs={"device": "cpu"},
+#         encode_kwargs={"normalize_embeddings": True}
+#     )
 
-    db = Chroma(
-        persist_directory=CHROMA_PATH,
-        embedding_function=embedding_model
-    )
+#     db = Chroma(
+#         persist_directory=CHROMA_PATH,
+#         embedding_function=embedding_model
+#     )
 
-    # 1. Hapus embedding lama kandidat ini
-    db.delete(where={"candidate_id": candidate["id"]})
+#     # 1. Hapus embedding lama kandidat ini
+#     db.delete(where={"candidate_id": candidate["id"]})
 
-    # 2. Buat embedding baru
-    docs = process_candidates_to_documents([candidate])
-    db.add_documents(docs)
+#     # 2. Buat embedding baru
+#     docs = process_candidates_to_documents([candidate])
+#     db.add_documents(docs)
 
 
-# # if __name__ == "__main__":
-# #     generate_vector_store()
+# # # if __name__ == "__main__":
+# # #     generate_vector_store()

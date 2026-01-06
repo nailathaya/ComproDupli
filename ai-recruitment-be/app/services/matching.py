@@ -3,7 +3,18 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sqlalchemy.orm import Session, joinedload
 from app.models.job_posting import JobPosting
 
-model = SentenceTransformer("intfloat/multilingual-e5-small")
+# model = SentenceTransformer("intfloat/multilingual-e5-small")
+
+_model = None
+
+def get_model():
+    global _model
+    if _model is None:
+        _model = SentenceTransformer(
+            "intfloat/multilingual-e5-small",
+            device="cpu"
+        )
+    return _model
 
 def build_job_description_text(job_description: dict) -> str:
     """
@@ -190,6 +201,7 @@ def match_candidates(
     candidates: List[Dict],
 ) -> List[Dict]:
     # Encode job sekali saja
+    model = get_model()
     job_embedding = model.encode(
         job_text,
         normalize_embeddings=True
