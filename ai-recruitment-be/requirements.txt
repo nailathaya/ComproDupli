@@ -3,7 +3,7 @@ uvicorn
 sqlalchemy
 pymysql
 python-dotenv
-
+email-validator
 langchain
 langchain-chroma
 langchain-huggingface
