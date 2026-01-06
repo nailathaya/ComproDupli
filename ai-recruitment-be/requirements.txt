@@ -3,7 +3,7 @@ uvicorn
 sqlalchemy
 pymysql
 python-dotenv
-
+pydantic[email]
 langchain
 langchain-chroma
 langchain-huggingface
