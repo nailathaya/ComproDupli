@@ -11,3 +11,4 @@ langchain-openai
 
 python-jose[cryptography]
 passlib[bcrypt]
+sentence-transformers
