@@ -33,16 +33,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     const res = await loginCandidate(credentials);
 
     // 🔥 VALIDASI WAJIB
-    if (!res?.access_token || !res?.user) {
+    if (!res?.token || !res?.user) {
       throw new Error('Invalid login response');
     }
 
-    localStorage.setItem('access_token', res.access_token);
+    localStorage.setItem('token', res.token);
 
     set({
       isAuthenticated: true,
       user: res.user,
-      token: res.access_token,
+      token: res.token,
       loading: false,
     });
 
@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('access_token');
+    localStorage.removeItem('token');
     set({
       isAuthenticated: false,
       user: null,

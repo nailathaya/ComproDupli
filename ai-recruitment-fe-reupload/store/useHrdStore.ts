@@ -13,7 +13,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
    AUTH HEADER
 ===================== */
 function authHeader() {
-  const token = localStorage.getItem("access_token"); // ✅ SAMAKAN
+  const token = localStorage.getItem("token"); // ✅ SAMAKAN
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -239,7 +239,7 @@ updateStageStatus: async (candidateId, applicationId, stageName, newStatus) => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     }
   );

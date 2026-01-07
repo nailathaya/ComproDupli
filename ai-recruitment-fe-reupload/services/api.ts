@@ -9,7 +9,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 ===================== */
 
 function authHeader() {
-  const token = localStorage.getItem("access_token"); // ✅ SAMA
+  const token = localStorage.getItem("token"); // ✅ SAMA
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -33,7 +33,7 @@ export async function loginCandidate(credentials: {
   const data = await res.json();
 
   // 🔥 SIMPAN TOKEN DI SINI
-  localStorage.setItem("access_token", data.access_token);
+  localStorage.setItem("token", data.token);
 
   return data;
 }
@@ -324,7 +324,7 @@ export async function updateJobPosting(id: string, payload: any) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
     body: JSON.stringify(payload),
   });
