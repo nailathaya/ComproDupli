@@ -1,7 +1,7 @@
 // services/api.ts
 import { WorkExperience, Education, Skill, Document } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://kyrie-semisacred-laverna.ngrok-free.dev"; 
 
 /* =====================
    AUTH HEADER
