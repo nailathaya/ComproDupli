@@ -32,8 +32,7 @@ export async function loginCandidate(credentials: {
 
   const data = await res.json();
 
-  // 🔥 SIMPAN TOKEN DI SINI
-  localStorage.setItem("token", data.token);
+  localStorage.setItem("token", data.access_token);
 
   return data;
 }

@@ -32,17 +32,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   try {
     const res = await loginCandidate(credentials);
 
-    // 🔥 VALIDASI WAJIB
-    if (!res?.token || !res?.user) {
+    if (!res?.access_token || !res?.user) {
       throw new Error('Invalid login response');
     }
 
-    localStorage.setItem('token', res.token);
+    localStorage.setItem('token', res.access_token);
 
     set({
       isAuthenticated: true,
       user: res.user,
-      token: res.token,
+      token: res.access_token,
       loading: false,
     });
 
