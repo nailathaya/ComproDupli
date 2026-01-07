@@ -52,6 +52,7 @@ export const useJobStore = create<JobState>((set, get) => ({
   fetchJobs: async () => {
   set({ loading: true });
   try {
+    console.log("tessssssss");
     const data = await getPublicJobs();
 
     const mappedJobs: Job[] = data.map((j: any) => ({
