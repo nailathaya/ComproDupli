@@ -13,7 +13,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
    AUTH HEADER
 ===================== */
 function authHeader() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access_token"); // ✅ SAMAKAN
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -115,7 +115,7 @@ export const useHrdStore = create<HrdState>((set, get) => ({
     set({
       candidates: data.map((cand: any) => ({
         ...cand,
-        aiScreening: cand.ai_screening ?? cand.aiScreening ?? null,
+        aiScreening: cand.aiScreening ?? null,
       })),
     });
 
@@ -233,7 +233,7 @@ updateStageStatus: async (candidateId, applicationId, stageName, newStatus) => {
 
   // 2️⃣ BACKEND SYNC
   await fetch(
-    `http://127.0.0.1:8000/applications/${applicationId}/stage?name=${stageName}&status=${newStatus}`,
+    `${API_BASE_URL}/applications/${applicationId}/stage?name=${stageName}&status=${newStatus}`,
     {
       method: 'PUT',
       headers: {
