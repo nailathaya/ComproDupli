@@ -287,7 +287,12 @@ export async function getJobPostings() {
 }
 
 export async function getPublicJobs() {
-  const res = await fetch(`${API_BASE_URL}/job-postings/public`);
+  const res = await fetch(`${API_BASE_URL}/job-postings/public`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader(),
+    },
+  });
 
   if (!res.ok) {
     throw new Error("Failed to fetch public jobs");
@@ -330,8 +335,8 @@ export async function updateJobPosting(id: string, payload: any) {
   const res = await fetch(`${API_BASE_URL}/job-postings/${id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      "Content-Type": "application/json",
+      ...authHeader(),
     },
     body: JSON.stringify(payload),
   });
