@@ -8,9 +8,17 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
    AUTH HEADER
 ===================== */
 
+// function authHeader() {
+//   const token = localStorage.getItem("token"); // ✅ SAMA
+//   return token ? { Authorization: `Bearer ${token}` } : {};
+// }
+
 function authHeader() {
-  const token = localStorage.getItem("token"); // ✅ SAMA
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const token = localStorage.getItem("token");
+  return {
+    Authorization: token ? `Bearer ${token}` : "",
+    "ngrok-skip-browser-warning": "true",
+  };
 }
 
 
