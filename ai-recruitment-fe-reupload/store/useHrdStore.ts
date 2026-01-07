@@ -174,6 +174,7 @@ runMatching: async (jobId: string) => {
   set({ loading: true });
 
   try {
+    console.log("🔥 API_BASE_URL =", API_BASE_URL);
     const res = await fetch(`${API_BASE_URL}/ai/match`, {
       method: 'POST',
       headers: {
