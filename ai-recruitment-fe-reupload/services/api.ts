@@ -264,7 +264,7 @@ export async function createJobPosting(data: {
 }
 
 export async function getJobPostings() {
-  const res = await fetch(`${API_BASE_URL}/job-postings`, {
+  const res = await fetch(`${API_BASE_URL}/job-postings/public`, {
     headers: {
       ...authHeader(),
     },
