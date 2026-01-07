@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error('Invalid login response');
     }
 
-    localStorage.setItem('token', res.access_token);
+    localStorage.setItem('access_token', res.access_token);
 
     set({
       isAuthenticated: true,
@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
     set({
       isAuthenticated: false,
       user: null,
