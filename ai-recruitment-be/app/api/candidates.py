@@ -29,7 +29,10 @@ router = APIRouter(prefix="/candidates", tags=["Candidates"])
 
 
 @router.get("/management", response_model=List[CandidateManagementResponse])
-def get_candidates(db: Session = Depends(get_db)):
+def get_candidates(db: Session = Depends(get_db), 
+                   current_user: User = Depends(get_current_user),):
+    if current_user.role != "hrd":
+        raise HTTPException(status_code=403, detail="Forbidden")
     applications = (
         db.query(Application)
         .options(
